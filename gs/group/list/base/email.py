@@ -28,7 +28,6 @@ from zope.datetime import parseDatetimetz
 from gs.core import to_unicode_or_bust, convert_int2b62
 from .html2txt import convert_to_txt
 
-
 reRegexp = re.compile('re:', re.IGNORECASE)
 fwRegexp = re.compile('fw:', re.IGNORECASE)
 fwdRegexp = re.compile('fwd:', re.IGNORECASE)
@@ -40,7 +39,6 @@ annoyingCharsR = annoyingChars + '\u202B\u202E'
 
 
 class EmailMessage(object):
-#FIXME: implements(IEmailMessage)
 
     def __init__(self, message, list_title='', group_id='', site_id='',
                  sender_id_cb=None, replace_mail_date=True):
