@@ -36,9 +36,9 @@ class HTMLConverter(HTMLParser):
 
     def __init__(self):
         HTMLParser.__init__(self)
-        self.outText = u''
+        self.outText = ''
         self.lastHREF = []
-        self.lastData = u''
+        self.lastData = ''
 
     def __unicode__(self):
         retval = self.dupeNewlineRE.sub('\n\n', self.outText)
@@ -74,7 +74,8 @@ class HTMLConverter(HTMLParser):
 
 
 def convert_to_txt(html):
-    assert html, 'html argument not set.'
+    if not html:
+        raise ValueError('html argument not set.')
     converter = HTMLConverter()
 
     converter.feed(html)
