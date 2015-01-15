@@ -19,13 +19,14 @@ from gs.group.list.base.emailmessage import EmailMessage
 
 
 class EmailMessageTest(TestCase):
-    def setUp(self):
-        m = '''From: Me <a.member@example.com>
+    m = '''From: Me <a.member@example.com>
 To: Group <group@groups.example.com>
 Subject: Violence
 
 Tonight on Ethyl the Frog we look at violence.\n'''
-        self.message = EmailMessage(m)
+
+    def setUp(self):
+        self.message = EmailMessage(self.m)
 
     def test_check_encoding_odd(self):
         r = self.message.check_encoding('wierd')
@@ -41,4 +42,28 @@ Tonight on Ethyl the Frog we look at violence.\n'''
 
     def test_check_encoding_utf8(self):
         r = self.message.check_encoding('utf-8')
+        self.assertEqual('utf-8', r)
+
+    def test_encoding_missing(self):
+        r = self.message.encoding
+        self.assertEqual('utf-8', r)
+
+    def test_encoding_ascii(self):
+        self.message.message.set_charset('ascii')
+        r = self.message.encoding
+        self.assertEqual('us-ascii', r)
+
+    def test_encoding_latin1(self):
+        self.message.message.set_charset('latin1')
+        r = self.message.encoding
+        self.assertEqual('iso8859-1', r)
+
+    def test_encoding_iso8859_1(self):
+        self.message.message.set_charset('ISO8859-1')
+        r = self.message.encoding
+        self.assertEqual('iso8859-1', r)
+
+    def test_encoding_utf8(self):
+        self.message.message.set_charset('utf-8')
+        r = self.message.encoding
         self.assertEqual('utf-8', r)
