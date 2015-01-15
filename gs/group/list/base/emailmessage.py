@@ -41,15 +41,15 @@ annoyingCharsR = annoyingChars + '\u202B\u202E'
 
 class EmailMessage(object):
 
-    def __init__(self, message, list_title='', group_id='', site_id='',
-                 sender_id_cb=None):
+    def __init__(self, messageString, list_title='', group_id='',
+                 site_id='', sender_id_cb=None):
         self._list_title = list_title
         self.group_id = group_id
         self.site_id = site_id
         self.sender_id_cb = sender_id_cb
         # --=mpj17=-- self.message is not @Lazy, because it is mutable.
-        parser = Parser.Parser()
-        self.message = parser.parsestr(message)
+        parser = Parser()
+        self.message = parser.parsestr(messageString)
 
     @staticmethod
     def check_encoding(encoding):
