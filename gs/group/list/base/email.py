@@ -12,19 +12,20 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ############################################################################
+############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
-from datetime import datetime
 from email import Parser, Header
-try:
+try:  # Python 2
     from hashlib import md5
-except:
+    INT = long
+except:  # Python 3
     from md5 import md5  # lint:ok
+    INT = int
 import re
 from rfc822 import AddressList
 import string
 from zope.cachedescriptors.property import Lazy
-from zope.datetime import parseDatetimetz
 from gs.core import to_unicode_or_bust, convert_int2b62
 from .html2txt import convert_to_txt
 
@@ -41,20 +42,14 @@ annoyingCharsR = annoyingChars + '\u202B\u202E'
 class EmailMessage(object):
 
     def __init__(self, message, list_title='', group_id='', site_id='',
-                 sender_id_cb=None, replace_mail_date=True):
+                 sender_id_cb=None):
         self._list_title = list_title
         self.group_id = group_id
         self.site_id = site_id
         self.sender_id_cb = sender_id_cb
-        self.replace_mail_date = replace_mail_date
         # --=mpj17=-- self.message is not @Lazy, because it is mutable.
         parser = Parser.Parser()
         self.message = parser.parsestr(message)
-
-    @Lazy
-    def _date(self):
-        retval = datetime.now()
-        return retval
 
     @staticmethod
     def check_encoding(encoding):
@@ -85,6 +80,7 @@ class EmailMessage(object):
 
     @Lazy
     def sender_id(self):
+        # FIXME: rewrite into a query.
         retval = ''
         if self.sender_id_cb:
             retval = self.sender_id_cb(self.sender)
@@ -105,86 +101,6 @@ class EmailMessage(object):
             name = matchObj.group('filename')
         return name
 
-    @staticmethod
-    def calculate_file_id(file_body, mime_type):
-        #
-        # Two files will have the same ID if
-        # - They have the same MD5 Sum, and
-        # - They have the same length, and
-        # - They have the same MIME-type.
-        #
-        length = len(file_body)
-        md5_sum = md5()
-        for c in file_body:
-            md5_sum.update(c)
-        file_md5 = md5_sum.hexdigest()
-        md5_sum.update(':' + str(length) + ':' + mime_type)
-        vNum = convert_int2b62(long(md5_sum.hexdigest(), 16))
-        retval = (to_unicode_or_bust(vNum), length, file_md5)
-        return retval
-
-    @Lazy
-    def attachments(self):
-        def split_multipart(msg, pl):
-            if msg.is_multipart():
-                for b in msg.get_payload():
-                    pl = split_multipart(b, pl)
-            else:
-                pl.append(msg)
-
-            return pl
-
-        retval = []
-        payload = self.message.get_payload()
-        if isinstance(payload, list):
-            outmessages = []
-            for i in payload:
-                outmessages = split_multipart(i, outmessages)
-
-            for msg in outmessages:
-                actual_payload = msg.get_payload(decode=True)
-                encoding = msg.get_param('charset', self.encoding)
-                pd = self.parse_disposition(msg.get('content-disposition',
-                                                    ''))
-                filename = to_unicode_or_bust(pd, encoding) if pd else ''
-                fileid, length, md5_sum = self.calculate_file_id(
-                    actual_payload, msg.get_content_type())
-                retval.append({
-                    'payload': actual_payload,
-                    'fileid': fileid,
-                    'filename': filename,
-                    'length': length,
-                    'md5': md5_sum,
-                    'charset': encoding,  # --=mpj17=-- Issues?
-                    'maintype': msg.get_content_maintype(),
-                    'subtype': msg.get_content_subtype(),
-                    'mimetype': msg.get_content_type(),
-                    'contentid': msg.get('content-id', '')})
-        else:
-            # Since we aren't a bunch of attachments, actually decode the
-            #   body
-            payload = self.message.get_payload(decode=True)
-            cd = self.message.get('content-disposition', '')
-            pd = self.parse_disposition(cd)
-            filename = to_unicode_or_bust(pd, self.encoding) if pd else ''
-
-            fileid, length, md5_sum = self.calculate_file_id(
-                payload, self.message.get_content_type())
-            retval = [{
-                      'payload': payload,
-                      'md5': md5_sum,
-                      'fileid': fileid,
-                      'filename': filename,
-                      'length': length,
-                      'charset': self.message.get_charset(),
-                      'maintype': self.message.get_content_maintype(),
-                      'subtype': self.message.get_content_subtype(),
-                      'mimetype': self.message.get_content_type(),
-                      'contentid': self.message.get('content-id', '')}]
-        assert retval is not None
-        assert type(retval) == list
-        return retval
-
     @property
     def headers(self):
         # --=mpj17=-- Not @Lazy because self.message. changes.
@@ -193,20 +109,6 @@ class EmailMessage(object):
                                    for x in self.message._headers])
         retval = to_unicode_or_bust(header_string, self.encoding)
         return retval
-
-    @Lazy
-    def attachment_count(self):
-        count = 0
-        for item in self.attachments:
-            if item['filename']:
-                count += 1
-        return count
-
-    @Lazy
-    def language(self):
-        # one day we might want to detect languages, primarily this
-        # will be used for stemming, stopwords and search
-        return 'en'
 
     @Lazy
     def body(self):
@@ -221,13 +123,6 @@ class EmailMessage(object):
             retval = convert_to_txt(h)
         assert retval is not None
         return retval
-
-    @Lazy
-    def html_body(self):
-        for item in self.attachments:
-            if item['filename'] == '' and item['subtype'] == 'html':
-                return to_unicode_or_bust(item['payload'], self.encoding)
-        return ''
 
     @staticmethod
     def strip_subject(subject, list_title, remove_re=True):
@@ -306,19 +201,6 @@ class EmailMessage(object):
         return self.get('in-reply-to')
 
     @Lazy
-    def date(self):
-        if self.replace_mail_date:
-            return self._date
-        d = self.get('date', '').strip()
-        if d:
-            # if we have the format Sat, 10 Mar 2007 22:47:20 +1300 (NZDT)
-            # strip the (NZDT) bit before parsing, otherwise we break the
-            # parser
-            d = re.sub(' \(.*?\)', '', d)
-            return parseDatetimetz(d)
-        return self._date
-
-    @Lazy
     def md5_body(self):
         retval = md5(self.body.encode('utf-8')).hexdigest()
         return retval
@@ -333,7 +215,7 @@ class EmailMessage(object):
             self.site_id
         tid = md5(items.encode('utf-8')).hexdigest()
 
-        retval = to_unicode_or_bust(convert_int2b62(long(tid, 16)))
+        retval = to_unicode_or_bust(convert_int2b62(INT(tid, 16)))
         return retval
 
     @Lazy
@@ -353,5 +235,5 @@ class EmailMessage(object):
                  self.md5_body + ':' + self.sender + ':' +
                  self.inreplyto + ':' + str(len_payloads))
         pid = md5(items.encode('utf-8')).hexdigest()
-        retval = to_unicode_or_bust(convert_int2b62(long(pid, 16)))
+        retval = to_unicode_or_bust(convert_int2b62(INT(pid, 16)))
         return retval
