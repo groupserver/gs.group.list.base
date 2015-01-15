@@ -12,10 +12,10 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ############################################################################
-############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
-from email import Parser, Header
+from email.parser import Parser
+from email.header import Header
 try:  # Python 2
     from hashlib import md5
     INT = long
