@@ -197,10 +197,12 @@ Two files will have the same ID if
 
     @Lazy
     def html_body(self):
+        retval = ''
         for item in self.attachments:
             if item['filename'] == '' and item['subtype'] == 'html':
-                return to_unicode_or_bust(item['payload'], self.encoding)
-        return ''
+                retval = to_unicode_or_bust(item['payload'],
+                                            item['charset'])
+        return retval
 
     @Lazy
     def body(self):

@@ -120,6 +120,41 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         self.assertEqual('text/plain', r[1]['mimetype'])
         self.assertEqual(textAttachment.get_payload(), r[1]['payload'])
 
+    def test_html_body(self):
+        a = MIMEMultipart('alternative')
+        tt = MIMEText(
+            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'plain', 'UTF-8')
+        a.attach(tt)
+        th = MIMEText(
+            '<p>Tonight on Ethyl the Frog&#8230; we look at '
+            'violence.\n</p>', 'html', 'us-ascii')
+        a.attach(th)
+        for h, v in self.message.message.items():
+            a.add_header(h, v)
+        self.message.message = a
+
+        r = self.message.html_body
+        self.assertEqual(th.get_payload(), r)
+
+    def test_html_body_utf8(self):
+        a = MIMEMultipart('alternative')
+        tt = MIMEText(
+            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'plain', 'UTF-8')
+        a.attach(tt)
+        th = MIMEText(
+            '<p>Tonight on Ethyl the Frog\u2026 we look at '
+            'violence.\n</p>', 'html', 'utf-8')
+        a.attach(th)
+        for h, v in self.message.message.items():
+            a.add_header(h, v)
+        self.message.message = a
+
+        expected = th.get_payload(decode=True).decode('utf-8')
+        r = self.message.html_body
+        self.assertEqual(expected, r)
+
     def test_body(self):
         r = self.message.body
         self.assertEqual('Tonight on Ethyl the Frog we look at violence.\n',
