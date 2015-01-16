@@ -14,10 +14,12 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 import re
-try:
+try:  # Python 3
+    from html.entities import name2codepoint
     from html.parser import HTMLParser
-except:
+except:  # Python 2
     from HTMLParser import HTMLParser
+    from htmlentitydefs import name2codepoint
 from gs.core import to_ascii, to_unicode_or_bust
 
 
@@ -42,7 +44,7 @@ class HTMLConverter(HTMLParser):
 
     def __unicode__(self):
         text = self.dupeNewlineRE.sub('\n\n', self.outText)
-        retval = to_unicode_or_bust(text)
+        retval = to_unicode_or_bust(text).strip()
         return retval
 
     def __str__(self):
@@ -64,14 +66,27 @@ class HTMLConverter(HTMLParser):
         if tag == 'a' and self.lastHREF:
             href = self.lastHREF.pop()
             if href and (href != self.lastData):
-                self.outText = self.outText + ' <%s> ' % href
+                self.emit(' <{0}> '.format(href))
+
+    def emit(self, c):
+        self.outText = self.outText + c
+
+    def handle_charref(self, name):
+        i = int(name)
+        c = unichr(i)
+        self.emit(c)
+
+    def handle_entityref(self, name):
+        i = name2codepoint.get(name, None)
+        if i is not None:
+            c = unichr(i)
+            self.emit(c)
 
     def handle_data(self, data):
         data = to_unicode_or_bust(data)
-        d = data.strip()
-        d = d and ('%s ' % d) or '\n'
+        d = data if data.strip() else '\n'
         self.lastData = d
-        self.outText = self.outText + d
+        self.emit(d)
 
 
 def convert_to_txt(html):
