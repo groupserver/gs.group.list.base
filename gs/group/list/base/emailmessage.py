@@ -95,8 +95,8 @@ class EmailMessage(object):
 
     @property
     def headers(self):
+        'Return a flattened version of the headers in the message'
         # --=mpj17=-- Not @Lazy because self.message. changes.
-        # return a flattened version of the headers
         headers = [': '.join(x) for x in self.message.items()]
         header_string = '\n'.join(headers)
         retval = to_unicode_or_bust(header_string, self.encoding)
@@ -104,11 +104,12 @@ class EmailMessage(object):
 
     @staticmethod
     def parse_disposition(s):
+        '''Get the filename from the content disposition header'''
         matchObj = re.search('(?i)filename="*(?P<filename>[^"]*)"*', s)
-        name = ''
+        retval = ''
         if matchObj:
-            name = matchObj.group('filename')
-        return name
+            retval = matchObj.group('filename')
+        return retval
 
     @staticmethod
     def calculate_file_id(file_body, mime_type):

@@ -73,6 +73,15 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.headers
         self.assertEqual(self.m.split('\n\n')[0], r)
 
+    def test_parse_disposition_no_match(self):
+        r = self.message.parse_disposition('Putting the boot in')
+        self.assertEqual('', r)
+
+    def test_parse_disposition(self):
+        d = '''Content-disposition: attachment; filename="IMG.pdf"'''
+        r = self.message.parse_disposition(d)
+        self.assertEqual('IMG.pdf', r)
+
     def test_body(self):
         r = self.message.body
         self.assertEqual('Tonight on Ethyl the Frog we look at violence.\n',
