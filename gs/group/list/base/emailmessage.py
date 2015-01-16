@@ -150,7 +150,7 @@ class EmailMessage(object):
             subject = subject.lstrip(annoyingCharsL)
             subject = subject.rstrip(annoyingCharsR)
         if len(subject) == 0:
-            subject = 'No Subject'
+            subject = 'No subject'
         return subject
 
     @Lazy
