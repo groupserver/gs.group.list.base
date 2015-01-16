@@ -69,6 +69,10 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.encoding
         self.assertEqual('utf-8', r)
 
+    def test_headers(self):
+        r = self.message.headers
+        self.assertEqual(self.m.split('\n\n')[0], r)
+
     def test_body(self):
         r = self.message.body
         self.assertEqual('Tonight on Ethyl the Frog we look at violence.\n',

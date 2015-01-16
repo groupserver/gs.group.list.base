@@ -97,8 +97,8 @@ class EmailMessage(object):
     def headers(self):
         # --=mpj17=-- Not @Lazy because self.message. changes.
         # return a flattened version of the headers
-        header_string = '\n'.join(['%s: %s' % (x[0], x[1])
-                                   for x in self.message._headers])
+        headers = [': '.join(x) for x in self.message.items()]
+        header_string = '\n'.join(headers)
         retval = to_unicode_or_bust(header_string, self.encoding)
         return retval
 
