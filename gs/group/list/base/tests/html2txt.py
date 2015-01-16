@@ -50,6 +50,14 @@ class HTMLConverterTest(TestCase):
         r = unicode(self.converter)
         self.assertEqual(expected, r)
 
+    def test_broken_entityref(self):
+        html = '<p>Je ne ecrit pas fran&piranha;ais.</p>'
+        self.converter.feed(html)
+        self.converter.close()
+
+        expected = 'Je ne ecrit pas franais.'
+        r = unicode(self.converter)
+        self.assertEqual(expected, r)
 
 class ConvertToTextTest(TestCase):
     def setUp(self):
