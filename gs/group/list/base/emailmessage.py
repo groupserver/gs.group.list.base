@@ -126,7 +126,10 @@ Two files will have the same ID if
         length = len(file_body)
         md5_sum = md5()
         for c in file_body:
-            md5_sum.update(c)
+            if type(c) == unicode:
+                md5_sum.update(c.encode('ascii', 'xmlcharrefreplace'))
+            else:
+                md5_sum.update(c)
         file_md5 = md5_sum.hexdigest()
         md5_sum.update(':' + str(length) + ':' + mime_type)
         vNum = convert_int2b62(INT(md5_sum.hexdigest(), 16))

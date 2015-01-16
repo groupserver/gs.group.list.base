@@ -13,10 +13,12 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals
+import codecs
 from email.mime.multipart import MIMEMultipart
 from email.parser import Parser
 from email.mime.text import MIMEText
 #from mock import patch
+import os
 from unittest import TestCase
 from gs.group.list.base.emailmessage import EmailMessage
 
@@ -304,3 +306,52 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.post_id
         # --=mpj17=-- This is fragile.
         self.assertNotEqual('68WJx41vQmeQ543Y1Y02VZ', r)
+
+    def test_txt_file(self):
+        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                                'txt.mbox')
+        parser = Parser()
+        with codecs.open(filename, encoding='utf-8') as infile:
+            m = parser.parse(infile)
+        self.message.message = m
+
+        r = self.message.body.strip()
+        self.assertEqual('God is real, unless declared integer.', r)
+
+    def test_txt_and_html_file(self):
+        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                                'txt-html.mbox')
+        parser = Parser()
+        with codecs.open(filename, encoding='utf-8') as infile:
+            m = parser.parse(infile)
+        self.message.message = m
+
+        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                                'multi-p.txt')
+        with codecs.open(filename, encoding='utf-8') as infile:
+            expected = infile.read().strip()[:128]
+        r = self.message.body[:128]
+        self.maxDiff = None
+        self.assertEqual(expected, r)
+
+        self.assertIn(expected[:8], self.message.html_body)
+        self.assertIn('<HTML>', self.message.html_body)
+
+    def test_html_file(self):
+        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                                'html.mbox')
+        parser = Parser()
+        with codecs.open(filename, encoding='utf-8') as infile:
+            m = parser.parse(infile)
+        self.message.message = m
+
+        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                                'multi-p.txt')
+        with codecs.open(filename, encoding='utf-8') as infile:
+            expected = infile.read().strip()[:64]
+        r = self.message.body[:64]
+        self.maxDiff = None
+        self.assertEqual(expected, r)
+
+        self.assertIn(expected[:8], self.message.html_body)
+        self.assertIn('<HTML>', self.message.html_body)
