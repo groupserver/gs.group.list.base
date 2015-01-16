@@ -186,7 +186,7 @@ Two files will have the same ID if
                       'fileid': fileid,
                       'filename': filename,
                       'length': length,
-                      'charset': self.message.get_charset(),
+                      'charset': str(self.message.get_charset()),
                       'maintype': self.message.get_content_maintype(),
                       'subtype': self.message.get_content_subtype(),
                       'mimetype': self.message.get_content_type(),
@@ -211,10 +211,8 @@ Two files will have the same ID if
             if item['filename'] == '' and item['subtype'] != 'html':
                 retval = to_unicode_or_bust(item['payload'], self.encoding)
                 break
-        html_body = self.html_body
-        if html_body and (not retval):
-            h = html_body.encode(self.encoding, 'xmlcharrefreplace')
-            retval = convert_to_txt(h)
+        if self.html_body and (not retval):
+            retval = convert_to_txt(self.html_body).strip()
         assert retval is not None
         return retval
 

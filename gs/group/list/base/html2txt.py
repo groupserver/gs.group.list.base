@@ -41,7 +41,8 @@ class HTMLConverter(HTMLParser):
         self.lastData = ''
 
     def __unicode__(self):
-        retval = self.dupeNewlineRE.sub('\n\n', self.outText)
+        text = self.dupeNewlineRE.sub('\n\n', self.outText)
+        retval = to_unicode_or_bust(text)
         return retval
 
     def __str__(self):
@@ -81,5 +82,5 @@ def convert_to_txt(html):
     converter.feed(html)
     converter.close()
 
-    retval = to_unicode_or_bust(converter)
+    retval = unicode(converter)
     return retval

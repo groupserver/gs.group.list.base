@@ -202,6 +202,29 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.body
         self.assertEqual(expected, r)
 
+    def test_body_html_only(self):
+        th = MIMEText(
+            '<p>Tonight on Ethyl the Frog\u2026 we look at '
+            'violence.\n</p>', 'html', 'utf-8')
+        for h, v in self.message.message.items():
+            th.add_header(h, v)
+        self.message.message = th
+
+        expected = 'Tonight on Ethyl the Frog\u2026 we look at violence.'
+        r = self.message.body
+        self.assertEqual(expected, r)
+
+    def test_body_html_only_latin1(self):
+        th = MIMEText(
+            "<p>Je ne ecrit pas français.</p>", 'html', 'latin-1')
+        for h, v in self.message.message.items():
+            th.add_header(h, v)
+        self.message.message = th
+
+        expected = 'Je ne ecrit pas français.'
+        r = self.message.body
+        self.assertEqual(expected, r)
+
     def test_strip_subject(self):
         r = self.message.strip_subject('[Ethyl the Frog] Violence',
                                        'Ethyl the Frog')
