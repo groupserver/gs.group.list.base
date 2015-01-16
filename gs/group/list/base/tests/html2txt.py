@@ -17,7 +17,7 @@ import codecs
 #from mock import patch
 import os
 from unittest import TestCase
-from gs.group.list.base.html2txt import HTMLConverter
+from gs.group.list.base.html2txt import (HTMLConverter, convert_to_txt)
 
 
 class HTMLConverterTest(TestCase):
@@ -61,6 +61,14 @@ class HTMLConverterTest(TestCase):
         r = unicode(self.converter)
         self.assertEqual(expected, r)
 
+    def test_not_html(self):
+        notHtml = 'On Ethyl the Frog tonight we look at violence.'
+        self.converter.feed(notHtml)
+        self.converter.close()
+
+        r = unicode(self.converter)
+        self.assertEqual(notHtml, r)
+
     def test_full_multi_paragraph(self):
         n = os.path.join('gs', 'group', 'list', 'base', 'tests',
                          'multi-p.html')
@@ -78,8 +86,24 @@ class HTMLConverterTest(TestCase):
 
 
 class ConvertToTextTest(TestCase):
-    def setUp(self):
-        pass
+    def test_html(self):
+        n = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                         'multi-p.html')
+        with codecs.open(n, encoding='utf-8') as infile:
+            html = infile.read()
 
-    def test_nothing(self):
-        self.assertTrue(True)
+        r = convert_to_txt(html)
+        n = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                         'multi-p.txt')
+        with codecs.open(n, encoding='utf-8') as infile:
+            expected = infile.read().strip()
+        self.assertEqual(expected, r)
+
+    def test_not_html(self):
+        notHtml = 'On Ethyl the Frog tonight we look at violence.'
+        r = convert_to_txt(notHtml)
+        self.assertEqual(notHtml, r)
+
+    def test_fail(self):
+        with self.assertRaises(ValueError):
+            convert_to_txt(None)
