@@ -115,3 +115,11 @@ Tonight on Ethyl the Frog we look at violence.\n'''
             'Subject', '[Ethyl the Frog] The Violence of British Gangland')
         r = self.message.compressed_subject
         self.assertEqual('theviolenceofbritishgangland', r)
+
+    def test_sender(self):
+        r = self.message.sender
+        self.assertEqual('a.member@example.com', r)
+
+    def test_name(self):
+        r = self.message.name
+        self.assertEqual('Me', r)

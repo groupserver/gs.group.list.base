@@ -14,8 +14,9 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
-from email.parser import Parser
 from email.header import Header
+from email.parser import Parser
+from email.utils import parseaddr
 try:  # Python 2
     from hashlib import md5
     INT = long
@@ -23,7 +24,6 @@ except:  # Python 3
     from md5 import md5  # lint:ok
     INT = int
 import re
-from rfc822 import AddressList
 import string
 from zope.cachedescriptors.property import Lazy
 from gs.core import to_unicode_or_bust, convert_int2b62
@@ -170,28 +170,19 @@ class EmailMessage(object):
 
     @Lazy
     def sender(self):
-        sender = self.get('from')
+        sender = self.message.get('From')
         if sender:
-            name, sender = AddressList(sender)[0]
-            sender = sender.lower()
-        return sender
-
-    @Lazy
-    def name(self):
-        sender = self.get('from')
-        retval = ''
-        if sender:
-            retval, sender = AddressList(sender)[0]
+            name, addr = parseaddr(sender)
+            retval = addr.lower()
         return retval
 
     @Lazy
-    def to(self):
-        to = self.get('to')
-        if to:
-            name, to = AddressList(to)[0]
-            to = to.lower()
-        # --=mpj17=-- TODO: Add the group name.
-        return to
+    def name(self):
+        sender = self.message.get('From')
+        retval = ''
+        if sender:
+            retval, sender = parseaddr(sender)
+        return retval
 
     @Lazy
     def title(self):
