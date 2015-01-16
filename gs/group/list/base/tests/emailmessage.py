@@ -155,10 +155,52 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.html_body
         self.assertEqual(expected, r)
 
+    def test_html_body_latin1(self):
+        a = MIMEMultipart('alternative')
+        tt = MIMEText(
+            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'plain', 'UTF-8')
+        a.attach(tt)
+        th = MIMEText(
+            '<p>Je ne ecrit pas français.\n</p>', 'html', 'latin-1')
+        a.attach(th)
+        for h, v in self.message.message.items():
+            a.add_header(h, v)
+        self.message.message = a
+
+        expected = th.get_payload(decode=True).decode('latin-1')
+        r = self.message.html_body
+        self.assertEqual(expected, r)
+
     def test_body(self):
+        'Test the simple case where there is only a plain-text body'
         r = self.message.body
         self.assertEqual('Tonight on Ethyl the Frog we look at violence.\n',
                          r)
+
+    def test_body_utf8(self):
+        tt = MIMEText(
+            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'plain', 'UTF-8')
+        for h, v in self.message.message.items():
+            tt.add_header(h, v)
+        self.message.message = tt
+
+        expected = tt.get_payload(decode=True).decode('utf-8')
+        r = self.message.body
+        self.assertEqual(expected, r)
+
+    def test_body_latin1(self):
+        tt = MIMEText(
+            "Je ne ecrit pas français.",
+            'plain', 'iso8859-1')
+        for h, v in self.message.message.items():
+            tt.add_header(h, v)
+        self.message.message = tt
+
+        expected = tt.get_payload(decode=True).decode('iso8859-1')
+        r = self.message.body
+        self.assertEqual(expected, r)
 
     def test_strip_subject(self):
         r = self.message.strip_subject('[Ethyl the Frog] Violence',
