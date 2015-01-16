@@ -135,6 +135,7 @@ Two files will have the same ID if
 
     @Lazy
     def attachments(self):
+        'Get the attachments, including the body'
         def split_multipart(msg, pl):
             if msg.is_multipart():
                 for b in msg.get_payload():

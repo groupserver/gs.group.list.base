@@ -13,6 +13,8 @@
 #
 ############################################################################
 from __future__ import absolute_import, unicode_literals
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 #from mock import patch
 from unittest import TestCase
 from gs.group.list.base.emailmessage import EmailMessage
@@ -81,6 +83,42 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         d = '''Content-disposition: attachment; filename="IMG.pdf"'''
         r = self.message.parse_disposition(d)
         self.assertEqual('IMG.pdf', r)
+
+    def test_calculate_file_id(self):
+        # --=mpj17=-- Using self.m as the file body because it is convinient
+        r = self.message.calculate_file_id(self.m, 'text/plain')
+        self.assertEqual('1gQzS4P7jPaZmJ9m51zQlY', r[0])
+        self.assertEqual(135, r[1])
+
+    def test_attachments_none(self):
+        'Test the body "attachment".'
+        r = self.message.attachments
+        self.assertEqual(1, len(r))
+        self.assertEqual('text/plain', r[0]['mimetype'])
+        self.assertEqual(self.m.split('\n\n')[1], r[0]['payload'])
+
+    def test_attachments_text(self):
+        'Test a plain-text attachment to a plain-text message'
+        # Create the message
+        mm = MIMEMultipart()
+        bodyText = MIMEText(
+            'Tonight on Ethyl the Frog we look at violence.\n')
+        mm.attach(bodyText)
+        textAttachment = MIMEText(
+            'When he grew up he took to putting the boot in.')
+        textAttachment.add_header('Content-Disposition', 'attachment',
+                                  filename='script.txt')
+        mm.attach(textAttachment)
+        for h, v in self.message.message.items():
+            mm.add_header(h, v)
+        self.message.message = mm
+
+        r = self.message.attachments
+        self.assertEqual(2, len(r))
+        self.assertEqual('text/plain', r[0]['mimetype'])
+        self.assertEqual(bodyText.get_payload(), r[0]['payload'])
+        self.assertEqual('text/plain', r[1]['mimetype'])
+        self.assertEqual(textAttachment.get_payload(), r[1]['payload'])
 
     def test_body(self):
         r = self.message.body
