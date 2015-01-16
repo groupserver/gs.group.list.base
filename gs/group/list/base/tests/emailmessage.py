@@ -94,6 +94,11 @@ Tonight on Ethyl the Frog we look at violence.\n'''
                                        'Ethyl the Frog')
         self.assertEqual('Violence', r)
 
-    def _test_compressed_subject(self):
-        r = self.message.compressed_subject
-        self.assertEqual('ethylthefrog', r)
+    def test_subject(self):
+        r = self.message.subject
+        self.assertEqual('Violence', r)
+
+    def test_subject_stripped(self):
+        self.message.message['Subject'] = '[Ethyl the Frog] Violence'
+        r = self.message.subject
+        self.assertEqual('Violence', r)

@@ -155,7 +155,8 @@ class EmailMessage(object):
 
     @Lazy
     def subject(self):
-        retval = self.strip_subject(self.get('subject'), self._list_title)
+        retval = self.strip_subject(self.message['Subject'],
+                                    self._list_title)
         return retval
 
     @staticmethod
