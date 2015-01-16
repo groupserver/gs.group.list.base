@@ -20,6 +20,7 @@ try:  # Python 3
 except:  # Python 2
     from HTMLParser import HTMLParser
     from htmlentitydefs import name2codepoint
+from textwrap import TextWrapper
 from gs.core import to_ascii, to_unicode_or_bust
 
 
@@ -32,15 +33,19 @@ class HTMLConverter(HTMLParser):
     newlines. In addition it puts the value of the ``href`` attributes
     of the anchor elements in angle-brackets after the anchor-text.'''
 
-    dupeNewlineRE = re.compile('\n\n+')
+    dupeNewlineRE = re.compile('\s+\n\n+')
+    dupeSpaceRE = re.compile('\s+')
 
     # See Ticket 596 <https://projects.iopen.net/groupserver/ticket/596>
 
     def __init__(self):
-        HTMLParser.__init__(self)
+        HTMLParser.__init__(self)  # Old-style class
+        self.textWrapper = TextWrapper(
+            width=74, replace_whitespace=True, drop_whitespace=True)
         self.outText = ''
         self.lastHREF = []
         self.lastData = ''
+        self.outP = None
 
     def __unicode__(self):
         text = self.dupeNewlineRE.sub('\n\n', self.outText)
@@ -58,6 +63,8 @@ class HTMLConverter(HTMLParser):
         if tag == 'a':
             attrsDict = dict(attrs)
             self.lastHREF.append(attrsDict.get('href', ''))
+        elif tag == 'p':
+            self.outP = ''
 
     def handle_endtag(self, tag):
         # Display the value of the href attribute of the anchor, if set.
@@ -67,9 +74,17 @@ class HTMLConverter(HTMLParser):
             href = self.lastHREF.pop()
             if href and (href != self.lastData):
                 self.emit(' <{0}> '.format(href))
+        elif tag == 'p':
+            t = self.dupeSpaceRE.sub(' ', self.outP)
+            wrappedTxt = self.textWrapper.fill(t).lstrip() + '\n\n'
+            self.outP = None
+            self.emit(wrappedTxt)
 
     def emit(self, c):
-        self.outText = self.outText + c
+        if self.outP is None:
+            self.outText = self.outText + c
+        else:
+            self.outP = self.outP + c
 
     def handle_charref(self, name):
         i = int(name)
