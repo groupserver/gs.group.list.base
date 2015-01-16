@@ -277,11 +277,6 @@ Two files will have the same ID if
         return retval
 
     @Lazy
-    def md5_body(self):
-        retval = md5(self.body.encode('utf-8')).hexdigest()
-        return retval
-
-    @Lazy
     def topic_id(self):
         # this is calculated from what we have/know
 
@@ -307,9 +302,11 @@ Two files will have the same ID if
         #    - The posts are from the same author, and
         #    - The posts respond to the same message, and
         #    - The posts have the same length of attachments.
+        md5Body = md5(self.body.encode('utf-8')).hexdigest()
         items = (self.topic_id + ':' + self.subject + ':' +
-                 self.md5_body + ':' + self.sender + ':' +
-                 self.inreplyto + ':' + str(len_payloads))
+                 md5Body + ':' + self.sender + ':' +
+                 self.message.get('in-reply-to', '') +
+                 ':' + str(len_payloads))
         pid = md5(items.encode('utf-8')).hexdigest()
         retval = to_unicode_or_bust(convert_int2b62(INT(pid, 16)))
         return retval

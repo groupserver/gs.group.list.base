@@ -14,6 +14,7 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 from email.mime.multipart import MIMEMultipart
+from email.parser import Parser
 from email.mime.text import MIMEText
 #from mock import patch
 from unittest import TestCase
@@ -279,3 +280,27 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_name(self):
         r = self.message.name
         self.assertEqual('Me', r)
+
+    def test_topic_id(self):
+        r = self.message.topic_id
+        # --=mpj17=-- This is fragile.
+        self.assertEqual('40PaLqrlTZWrEGcxlfDpft', r)
+
+    def test_topic_id_same_for_different_posts(self):
+        parser = Parser()
+        self.message.message = parser.parsestr(self.m + '.')
+        r = self.message.topic_id
+        # --=mpj17=-- This is fragile.
+        self.assertEqual('40PaLqrlTZWrEGcxlfDpft', r)
+
+    def test_post_id(self):
+        r = self.message.post_id
+        # --=mpj17=-- This is fragile.
+        self.assertEqual('68WJx41vQmeQ543Y1Y02VZ', r)
+
+    def test_post_id_randomish(self):
+        parser = Parser()
+        self.message.message = parser.parsestr(self.m + '.')
+        r = self.message.post_id
+        # --=mpj17=-- This is fragile.
+        self.assertNotEqual('68WJx41vQmeQ543Y1Y02VZ', r)
