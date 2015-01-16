@@ -67,3 +67,15 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         self.message.message.set_charset('utf-8')
         r = self.message.encoding
         self.assertEqual('utf-8', r)
+
+    def test_normalise_subject_empty(self):
+        r = self.message.normalise_subject('')
+        self.assertEqual('', r)
+
+    def test_normalise_lower(self):
+        r = self.message.normalise_subject('Violence')
+        self.assertEqual('violence', r)
+
+    def test_normalise_lower_whitespace(self):
+        r = self.message.normalise_subject('Ethyl the Frog')
+        self.assertEqual('ethylthefrog', r)
