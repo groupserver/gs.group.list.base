@@ -79,3 +79,21 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_normalise_lower_whitespace(self):
         r = self.message.normalise_subject('Ethyl the Frog')
         self.assertEqual('ethylthefrog', r)
+
+    def test_strip_subject(self):
+        r = self.message.strip_subject('[Ethyl the Frog] Violence',
+                                       'Ethyl the Frog')
+        self.assertEqual('Violence', r)
+
+    def test_strip_subject_missing(self):
+        r = self.message.strip_subject('', 'Ethyl the Frog')
+        self.assertEqual('No subject', r)
+
+    def test_strip_subject_re(self):
+        r = self.message.strip_subject('Re: [Ethyl the Frog] Violence',
+                                       'Ethyl the Frog')
+        self.assertEqual('Violence', r)
+
+    def _test_compressed_subject(self):
+        r = self.message.compressed_subject
+        self.assertEqual('ethylthefrog', r)
