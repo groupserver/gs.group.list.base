@@ -69,6 +69,11 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.encoding
         self.assertEqual('utf-8', r)
 
+    def test_body(self):
+        r = self.message.body
+        self.assertEqual('Tonight on Ethyl the Frog we look at violence.\n',
+                         r)
+
     def test_strip_subject(self):
         r = self.message.strip_subject('[Ethyl the Frog] Violence',
                                        'Ethyl the Frog')
