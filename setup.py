@@ -26,7 +26,10 @@ with codecs.open(os.path.join("docs", "HISTORY.rst"),
     long_description += '\n' + f.read()
 
 install_requires = [
-    'setuptools', ]
+    'setuptools',
+    'zope.cachedescriptors',
+    'zope.interface',
+    'gs.core', ]
 
 setup(name='gs.group.list.base',
       version=version,
@@ -54,6 +57,5 @@ setup(name='gs.group.list.base',
       zip_safe=False,
       install_requires=install_requires,
       test_suite="gs.group.list.base.tests.test_all",
-      tests_require=['mock', ],
       entry_points="""# -*- Entry points: -*-
       """,)
