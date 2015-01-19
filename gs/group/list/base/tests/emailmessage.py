@@ -14,6 +14,7 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
+from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.parser import Parser
 from email.mime.text import MIMEText
@@ -193,6 +194,16 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.body
         self.assertEqual(expected, r)
 
+    def test_body_windows1252(self):
+        tt = MIMEText("Je ne ecrit pas français.", 'plain', 'Windows-1252')
+        for h, v in self.message.message.items():
+            tt.add_header(h, v)
+        self.message.message = tt
+
+        expected = tt.get_payload(decode=True).decode('Windows-1252')
+        r = self.message.body
+        self.assertEqual(expected, r)
+
     def test_body_latin1(self):
         tt = MIMEText(
             "Je ne ecrit pas français.",
@@ -228,6 +239,17 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         r = self.message.body
         self.assertEqual(expected, r)
 
+    def test_body_html_only_windows1252(self):
+        th = MIMEText(
+            "<p>Je ne ecrit pas français.</p>", 'html', 'windows-1252')
+        for h, v in self.message.message.items():
+            th.add_header(h, v)
+        self.message.message = th
+
+        expected = 'Je ne ecrit pas français.'
+        r = self.message.body
+        self.assertEqual(expected, r)
+
     def test_strip_subject(self):
         r = self.message.strip_subject('[Ethyl the Frog] Violence',
                                        'Ethyl the Frog')
@@ -242,15 +264,82 @@ Tonight on Ethyl the Frog we look at violence.\n'''
                                        'Ethyl the Frog')
         self.assertEqual('Violence', r)
 
+    def test_decodedSubject(self):
+        r = self.message.decodedSubject
+        self.assertEqual('Violence', r)
+
+    def test_decodedSubject_latin1(self):
+        s = 'Je ne ecrit pas français.'
+        subj = Header(s.encode('latin-1'), 'latin-1').encode()
+        self.message.message.replace_header('Subject', subj)
+        r = self.message.decodedSubject
+        self.assertEqual(s, r)
+
+    def test_decodedSubject_utf8(self):
+        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        subj = Header(s.encode('utf-8'), 'utf-8').encode()
+        self.message.message.replace_header('Subject', subj)
+        r = self.message.decodedSubject
+        self.assertEqual(s, r)
+
+    def test_decodedSubject_windows1252(self):
+        s = 'Désolé.'
+        subj = Header(s.encode('windows-1252'), 'windows-1252').encode()
+        self.message.message.replace_header('Subject', subj)
+        r = self.message.decodedSubject
+        self.assertEqual(s, r)
+
+    def test_decodedSubject_utf8_ascii_latin1_windows1252(self):
+        'Test a header that has multiple encodings'
+        s0 = 'Tonight on Ethyl the Frog\u2026'
+        s1 = 'we look at violence.'
+        s2 = 'Je ne ecrit pas fran\u00e7ais.'
+        s3 = 'Désolé.'
+        subj = Header(s0.encode('utf8'), 'utf8')
+        subj.append(s1.encode('ascii'), 'ascii')
+        subj.append(s2.encode('latin1'), 'latin1')
+        subj.append(s3.encode('windows-1252'), 'windows-1252')
+        self.message.message.replace_header('Subject', subj.encode())
+
+        expected = s0 + s1 + s2 + s3
+        r = self.message.decodedSubject
+        self.assertEqual(expected, r)
+
     def test_subject(self):
         r = self.message.subject
         self.assertEqual('Violence', r)
+
+    def test_subject_utf8(self):
+        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        subj = Header(s.encode('utf-8'), 'utf-8')
+        self.message.message.replace_header('Subject', subj.encode())
+
+        self.assertNotEqual(self.message.message['Subject'], s)
+        r = self.message.subject
+        self.assertEqual(s, r)
+
+    def test_subject_windows1252(self):
+        s = 'Je ne ecrit pas fran\u00e7ais.'
+        subj = Header(s.encode('Windows-1252'), 'Windows-1252')
+        self.message.message.replace_header('Subject', subj.encode())
+
+        self.assertNotEqual(self.message.message['Subject'], s)
+        r = self.message.subject
+        self.assertEqual(s, r)
 
     def test_subject_stripped(self):
         self.message.message.replace_header(
             'Subject', '[Ethyl the Frog] The Violence of British Gangland')
         r = self.message.subject
         self.assertEqual('The Violence of British Gangland', r)
+
+    def test_subject_stripped_utf8(self):
+        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        fullS = '[Ethyl the Frog] ' + s
+        subj = Header(fullS.encode('utf-8'), 'utf-8')
+        self.message.message.replace_header('Subject', subj.encode())
+        r = self.message.subject
+        self.assertEqual(s, r)
 
     def test_normalise_subject_empty(self):
         r = self.message.normalise_subject('')
@@ -265,6 +354,11 @@ Tonight on Ethyl the Frog we look at violence.\n'''
                                            'Gangland')
         self.assertEqual('theviolenceofbritishgangland', r)
 
+    def test_normalise_lower_whitespace_utf8(self):
+        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        r = self.message.normalise_subject(s)
+        self.assertEqual('tonightonethylthefrog\u2026welookatviolence', r)
+
     def test_compressed_subject(self):
         r = self.message.compressed_subject
         self.assertEqual('violence', r)
@@ -274,6 +368,14 @@ Tonight on Ethyl the Frog we look at violence.\n'''
             'Subject', '[Ethyl the Frog] The Violence of British Gangland')
         r = self.message.compressed_subject
         self.assertEqual('theviolenceofbritishgangland', r)
+
+    def test_compressed_subject_whitespace_utf8(self):
+        s = '[Ethyl the Frog] Tonight on Ethyl the Frog\u2026 we look at '\
+            'violence'
+        subj = Header(s.encode('utf-8'), 'utf-8')
+        self.message.message.replace_header('Subject', subj.encode())
+        r = self.message.compressed_subject
+        self.assertEqual('tonightonethylthefrog\u2026welookatviolence', r)
 
     def test_sender(self):
         r = self.message.sender

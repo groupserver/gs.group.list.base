@@ -14,7 +14,7 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
-from email.header import Header
+from email.header import Header, decode_header
 from email.parser import Parser
 from email.utils import parseaddr
 try:  # Python 2
@@ -249,9 +249,20 @@ Two files will have the same ID if
         return subject
 
     @Lazy
+    def decodedSubject(self):
+        # A subject can be a series of words, each with a different
+        # encoding. First, get a list of (word, encoding) 2-tuples.
+        subjectTuples = decode_header(self.message['Subject'])
+        # Next, decode each onto Unicode. Tradition assumes ASCII, but I
+        # (mpj17) will assume UTF-8.
+        subjectWords = [t[0].decode(t[1] or 'utf-8') for t in subjectTuples]
+        # Finally, join them all together.
+        retval = ''.join(subjectWords)
+        return retval
+
+    @Lazy
     def subject(self):
-        retval = self.strip_subject(self.message['Subject'],
-                                    self._list_title)
+        retval = self.strip_subject(self.decodedSubject, self._list_title)
         return retval
 
     @staticmethod
