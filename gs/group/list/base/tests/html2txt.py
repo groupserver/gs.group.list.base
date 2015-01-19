@@ -25,21 +25,21 @@ class HTMLConverterTest(TestCase):
         self.converter = HTMLConverter()
 
     def test_simple(self):
-        html = '''<p>Tonight on Ethyl the Frog we look at violence.</p>'''
+        html = '''<p>Tonight on Ethel the Frog we look at violence.</p>'''
         self.converter.feed(html)
         self.converter.close()
 
-        expected = 'Tonight on Ethyl the Frog we look at violence.'
+        expected = 'Tonight on Ethel the Frog we look at violence.'
         r = unicode(self.converter)
         self.assertEqual(expected, r)
 
     def test_simple_charref(self):
-        html = '<p>Tonight on Ethyl the Frog&#8230; we look at '\
+        html = '<p>Tonight on Ethel the Frog&#8230; we look at '\
                'violence.</p>'
         self.converter.feed(html)
         self.converter.close()
 
-        expected = 'Tonight on Ethyl the Frog\u2026 we look at violence.'
+        expected = 'Tonight on Ethel the Frog\u2026 we look at violence.'
         r = unicode(self.converter)
         self.assertEqual(expected, r)
 
@@ -62,7 +62,7 @@ class HTMLConverterTest(TestCase):
         self.assertEqual(expected, r)
 
     def test_not_html(self):
-        notHtml = 'On Ethyl the Frog tonight we look at violence.'
+        notHtml = 'On Ethel the Frog tonight we look at violence.'
         self.converter.feed(notHtml)
         self.converter.close()
 
@@ -100,7 +100,7 @@ class ConvertToTextTest(TestCase):
         self.assertEqual(expected, r)
 
     def test_not_html(self):
-        notHtml = 'On Ethyl the Frog tonight we look at violence.'
+        notHtml = 'On Ethel the Frog tonight we look at violence.'
         r = convert_to_txt(notHtml)
         self.assertEqual(notHtml, r)
 

@@ -29,11 +29,11 @@ class EmailMessageTest(TestCase):
 To: Group <group@groups.example.com>
 Subject: Violence
 
-Tonight on Ethyl the Frog we look at violence.\n'''
+Tonight on Ethel the Frog we look at violence.\n'''
 
     def setUp(self):
-        self.message = EmailMessage(self.m, list_title='Ethyl the Frog',
-                                    group_id='ethyl')
+        self.message = EmailMessage(self.m, list_title='Ethel the Frog',
+                                    group_id='ethel')
 
     def test_check_encoding_odd(self):
         r = self.message.check_encoding('wierd')
@@ -91,7 +91,7 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_calculate_file_id(self):
         # --=mpj17=-- Using self.m as the file body because it is convinient
         r = self.message.calculate_file_id(self.m, 'text/plain')
-        self.assertEqual('1gQzS4P7jPaZmJ9m51zQlY', r[0])
+        self.assertEqual('5vsj6HxuPcUnW9ynMnxB6h', r[0])
         self.assertEqual(135, r[1])
 
     def test_attachments_none(self):
@@ -106,7 +106,7 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         # Create the message
         mm = MIMEMultipart()
         bodyText = MIMEText(
-            'Tonight on Ethyl the Frog we look at violence.\n')
+            'Tonight on Ethel the Frog we look at violence.\n')
         mm.attach(bodyText)
         textAttachment = MIMEText(
             'When he grew up he took to putting the boot in.')
@@ -127,11 +127,11 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_html_body(self):
         a = MIMEMultipart('alternative')
         tt = MIMEText(
-            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'Tonight on Ethel the Frog\u2026 we look at violence.\n',
             'plain', 'UTF-8')
         a.attach(tt)
         th = MIMEText(
-            '<p>Tonight on Ethyl the Frog&#8230; we look at '
+            '<p>Tonight on Ethel the Frog&#8230; we look at '
             'violence.\n</p>', 'html', 'us-ascii')
         a.attach(th)
         for h, v in self.message.message.items():
@@ -144,11 +144,11 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_html_body_utf8(self):
         a = MIMEMultipart('alternative')
         tt = MIMEText(
-            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'Tonight on Ethel the Frog\u2026 we look at violence.\n',
             'plain', 'UTF-8')
         a.attach(tt)
         th = MIMEText(
-            '<p>Tonight on Ethyl the Frog\u2026 we look at '
+            '<p>Tonight on Ethel the Frog\u2026 we look at '
             'violence.\n</p>', 'html', 'utf-8')
         a.attach(th)
         for h, v in self.message.message.items():
@@ -162,7 +162,7 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_html_body_latin1(self):
         a = MIMEMultipart('alternative')
         tt = MIMEText(
-            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'Tonight on Ethel the Frog\u2026 we look at violence.\n',
             'plain', 'UTF-8')
         a.attach(tt)
         th = MIMEText(
@@ -179,12 +179,12 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_body(self):
         'Test the simple case where there is only a plain-text body'
         r = self.message.body
-        self.assertEqual('Tonight on Ethyl the Frog we look at violence.\n',
+        self.assertEqual('Tonight on Ethel the Frog we look at violence.\n',
                          r)
 
     def test_body_utf8(self):
         tt = MIMEText(
-            'Tonight on Ethyl the Frog\u2026 we look at violence.\n',
+            'Tonight on Ethel the Frog\u2026 we look at violence.\n',
             'plain', 'UTF-8')
         for h, v in self.message.message.items():
             tt.add_header(h, v)
@@ -218,13 +218,13 @@ Tonight on Ethyl the Frog we look at violence.\n'''
 
     def test_body_html_only(self):
         th = MIMEText(
-            '<p>Tonight on Ethyl the Frog\u2026 we look at '
+            '<p>Tonight on Ethel the Frog\u2026 we look at '
             'violence.\n</p>', 'html', 'utf-8')
         for h, v in self.message.message.items():
             th.add_header(h, v)
         self.message.message = th
 
-        expected = 'Tonight on Ethyl the Frog\u2026 we look at violence.'
+        expected = 'Tonight on Ethel the Frog\u2026 we look at violence.'
         r = self.message.body
         self.assertEqual(expected, r)
 
@@ -251,17 +251,17 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         self.assertEqual(expected, r)
 
     def test_strip_subject(self):
-        r = self.message.strip_subject('[Ethyl the Frog] Violence',
-                                       'Ethyl the Frog')
+        r = self.message.strip_subject('[Ethel the Frog] Violence',
+                                       'Ethel the Frog')
         self.assertEqual('Violence', r)
 
     def test_strip_subject_missing(self):
-        r = self.message.strip_subject('', 'Ethyl the Frog')
+        r = self.message.strip_subject('', 'Ethel the Frog')
         self.assertEqual('No subject', r)
 
     def test_strip_subject_re(self):
-        r = self.message.strip_subject('Re: [Ethyl the Frog] Violence',
-                                       'Ethyl the Frog')
+        r = self.message.strip_subject('Re: [Ethel the Frog] Violence',
+                                       'Ethel the Frog')
         self.assertEqual('Violence', r)
 
     def test_decodedSubject(self):
@@ -276,7 +276,7 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         self.assertEqual(s, r)
 
     def test_decodedSubject_utf8(self):
-        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        s = 'Tonight on Ethel the Frog\u2026 we look at violence'
         subj = Header(s.encode('utf-8'), 'utf-8').encode()
         self.message.message.replace_header('Subject', subj)
         r = self.message.decodedSubject
@@ -291,7 +291,7 @@ Tonight on Ethyl the Frog we look at violence.\n'''
 
     def test_decodedSubject_utf8_ascii_latin1_windows1252(self):
         'Test a header that has multiple encodings'
-        s0 = 'Tonight on Ethyl the Frog\u2026'
+        s0 = 'Tonight on Ethel the Frog\u2026'
         s1 = 'we look at violence.'
         s2 = 'Je ne ecrit pas fran\u00e7ais.'
         s3 = 'Désolé.'
@@ -310,7 +310,7 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         self.assertEqual('Violence', r)
 
     def test_subject_utf8(self):
-        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        s = 'Tonight on Ethel the Frog\u2026 we look at violence'
         subj = Header(s.encode('utf-8'), 'utf-8')
         self.message.message.replace_header('Subject', subj.encode())
 
@@ -329,13 +329,13 @@ Tonight on Ethyl the Frog we look at violence.\n'''
 
     def test_subject_stripped(self):
         self.message.message.replace_header(
-            'Subject', '[Ethyl the Frog] The Violence of British Gangland')
+            'Subject', '[Ethel the Frog] The Violence of British Gangland')
         r = self.message.subject
         self.assertEqual('The Violence of British Gangland', r)
 
     def test_subject_stripped_utf8(self):
-        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
-        fullS = '[Ethyl the Frog] ' + s
+        s = 'Tonight on Ethel the Frog\u2026 we look at violence'
+        fullS = '[Ethel the Frog] ' + s
         subj = Header(fullS.encode('utf-8'), 'utf-8')
         self.message.message.replace_header('Subject', subj.encode())
         r = self.message.subject
@@ -355,9 +355,9 @@ Tonight on Ethyl the Frog we look at violence.\n'''
         self.assertEqual('theviolenceofbritishgangland', r)
 
     def test_normalise_lower_whitespace_utf8(self):
-        s = 'Tonight on Ethyl the Frog\u2026 we look at violence'
+        s = 'Tonight on Ethel the Frog\u2026 we look at violence'
         r = self.message.normalise_subject(s)
-        self.assertEqual('tonightonethylthefrog\u2026welookatviolence', r)
+        self.assertEqual('tonightonethelthefrog\u2026welookatviolence', r)
 
     def test_compressed_subject(self):
         r = self.message.compressed_subject
@@ -365,17 +365,17 @@ Tonight on Ethyl the Frog we look at violence.\n'''
 
     def test_compressed_subject_whitespace(self):
         self.message.message.replace_header(
-            'Subject', '[Ethyl the Frog] The Violence of British Gangland')
+            'Subject', '[Ethel the Frog] The Violence of British Gangland')
         r = self.message.compressed_subject
         self.assertEqual('theviolenceofbritishgangland', r)
 
     def test_compressed_subject_whitespace_utf8(self):
-        s = '[Ethyl the Frog] Tonight on Ethyl the Frog\u2026 we look at '\
+        s = '[Ethel the Frog] Tonight on Ethel the Frog\u2026 we look at '\
             'violence'
         subj = Header(s.encode('utf-8'), 'utf-8')
         self.message.message.replace_header('Subject', subj.encode())
         r = self.message.compressed_subject
-        self.assertEqual('tonightonethylthefrog\u2026welookatviolence', r)
+        self.assertEqual('tonightonethelthefrog\u2026welookatviolence', r)
 
     def test_sender(self):
         r = self.message.sender
@@ -388,19 +388,19 @@ Tonight on Ethyl the Frog we look at violence.\n'''
     def test_topic_id(self):
         r = self.message.topic_id
         # --=mpj17=-- This is fragile.
-        self.assertEqual('40PaLqrlTZWrEGcxlfDpft', r)
+        self.assertEqual('2kxkamRQ35fmTJ6pTRK8yN', r)
 
     def test_topic_id_same_for_different_posts(self):
         parser = Parser()
         self.message.message = parser.parsestr(self.m + '.')
         r = self.message.topic_id
         # --=mpj17=-- This is fragile.
-        self.assertEqual('40PaLqrlTZWrEGcxlfDpft', r)
+        self.assertEqual('2kxkamRQ35fmTJ6pTRK8yN', r)
 
     def test_post_id(self):
         r = self.message.post_id
         # --=mpj17=-- This is fragile.
-        self.assertEqual('68WJx41vQmeQ543Y1Y02VZ', r)
+        self.assertEqual('ZTcsX0Tw8Nww2LggPn78Y', r)
 
     def test_post_id_randomish(self):
         parser = Parser()
