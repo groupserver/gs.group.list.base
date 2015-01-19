@@ -273,6 +273,24 @@ Tonight on Ethel the Frog we look at violence.\n'''
                                        'Ethel the Frog')
         self.assertEqual('Violence', r)
 
+    def test_decode_header_value_tuple_none(self):
+        s = 'Tonight on Ethel the Frog'
+        r = self.message.decode_header_value_tuple((s.encode('utf-8'),
+                                                    None))
+        self.assertEqual(s, r)
+
+    def test_decode_header_value_tuple_utf8(self):
+        s = 'Tonight on Ethel the Frog'
+        r = self.message.decode_header_value_tuple((s.encode('utf-8'),
+                                                    'utf-8'))
+        self.assertEqual(s, r)
+
+    def test_decode_header_value_tuple_latin1(self):
+        s = 'Je ne ecrit pas français.'
+        r = self.message.decode_header_value_tuple((s.encode('latin1'),
+                                                    'latin-1'))
+        self.assertEqual(s, r)
+
     def test_decodedSubject(self):
         r = self.message.decodedSubject
         self.assertEqual('Violence', r)

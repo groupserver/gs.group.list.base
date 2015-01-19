@@ -260,8 +260,9 @@ Two files will have the same ID if
         return subject
 
     @staticmethod
-    def decode_header_tuple(headerTuple):
-        val, encoding = headerTuple
+    def decode_header_value_tuple(headerValueTuple):
+        val, encoding = headerValueTuple
+        # Tradition assumes ASCII, but I (mpj17) will assume UTF-8.
         encoding = encoding if encoding else 'utf-8'
         retval = to_unicode_or_bust(val, encoding)
         return retval
@@ -271,9 +272,9 @@ Two files will have the same ID if
         # A subject can be a series of words, each with a different
         # encoding. First, get a list of (word, encoding) 2-tuples.
         subjectTuples = decode_header(self.message['Subject'])
-        # Next, decode each onto Unicode. Tradition assumes ASCII, but I
-        # (mpj17) will assume UTF-8.
-        subjectWords = [self.decode_header_tuple(t) for t in subjectTuples]
+        # Next, decode each onto Unicode.
+        subjectWords = [self.decode_header_value_tuple(t)
+                        for t in subjectTuples]
         # Finally, join them all together.
         retval = ''.join(subjectWords)
         return retval
