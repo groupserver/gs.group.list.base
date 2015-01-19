@@ -17,7 +17,8 @@ import codecs
 #from mock import patch
 import os
 from unittest import TestCase
-from gs.group.list.base.html2txt import (HTMLConverter, convert_to_txt)
+from gs.group.list.base.html2txt import (HTMLConverter, convert_to_txt,
+                                         unicodeOrString)
 
 
 class HTMLConverterTest(TestCase):
@@ -30,7 +31,7 @@ class HTMLConverterTest(TestCase):
         self.converter.close()
 
         expected = 'Tonight on Ethel the Frog we look at violence.'
-        r = unicode(self.converter)
+        r = unicodeOrString(self.converter)
         self.assertEqual(expected, r)
 
     def test_simple_charref(self):
@@ -40,7 +41,7 @@ class HTMLConverterTest(TestCase):
         self.converter.close()
 
         expected = 'Tonight on Ethel the Frog\u2026 we look at violence.'
-        r = unicode(self.converter)
+        r = unicodeOrString(self.converter)
         self.assertEqual(expected, r)
 
     def test_simple_entityref(self):
@@ -49,7 +50,7 @@ class HTMLConverterTest(TestCase):
         self.converter.close()
 
         expected = 'Je ne ecrit pas français.'
-        r = unicode(self.converter)
+        r = unicodeOrString(self.converter)
         self.assertEqual(expected, r)
 
     def test_broken_entityref(self):
@@ -58,7 +59,7 @@ class HTMLConverterTest(TestCase):
         self.converter.close()
 
         expected = 'Je ne ecrit pas franais.'
-        r = unicode(self.converter)
+        r = unicodeOrString(self.converter)
         self.assertEqual(expected, r)
 
     def test_not_html(self):
@@ -66,7 +67,7 @@ class HTMLConverterTest(TestCase):
         self.converter.feed(notHtml)
         self.converter.close()
 
-        r = unicode(self.converter)
+        r = unicodeOrString(self.converter)
         self.assertEqual(notHtml, r)
 
     def test_full_multi_paragraph(self):
@@ -76,7 +77,7 @@ class HTMLConverterTest(TestCase):
             html = infile.read()
         self.converter.feed(html)
         self.converter.close()
-        r = unicode(self.converter)
+        r = unicodeOrString(self.converter)
 
         n = os.path.join('gs', 'group', 'list', 'base', 'tests',
                          'multi-p.txt')

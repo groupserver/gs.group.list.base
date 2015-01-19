@@ -17,18 +17,22 @@ import codecs
 from email.header import Header, decode_header
 from email.parser import Parser
 from email.utils import parseaddr
-try:  # Python 2
-    from hashlib import md5
-    INT = long
-except:  # Python 3
-    from md5 import md5  # lint:ok
-    INT = int
+from hashlib import md5
 import re
 import string
+import sys
 from zope.cachedescriptors.property import Lazy
 from gs.core import to_unicode_or_bust, convert_int2b62
 from .html2txt import convert_to_txt
 
+if (sys.version_info < (3, )):
+    INT = long
+    unicodeOrString = unicode
+    bytesOrString = str
+else:
+    INT = int
+    unicodeOrString = str
+    bytesOrString = bytes
 reRegexp = re.compile('re:', re.IGNORECASE)
 fwRegexp = re.compile('fw:', re.IGNORECASE)
 fwdRegexp = re.compile('fwd:', re.IGNORECASE)
@@ -126,12 +130,16 @@ Two files will have the same ID if
         length = len(file_body)
         md5_sum = md5()
         for c in file_body:
-            if type(c) == unicode:
+            if type(c) == unicodeOrString:
                 md5_sum.update(c.encode('ascii', 'xmlcharrefreplace'))
             else:
-                md5_sum.update(c)
+                val = bytesOrString(c)
+                md5_sum.update(val)
         file_md5 = md5_sum.hexdigest()
-        md5_sum.update(':' + str(length) + ':' + mime_type)
+        lenStr = ':%d:' % length
+        md5_sum.update(lenStr.encode('ascii', 'xmlcharrefreplace'))
+        mimeStr = to_unicode_or_bust(mime_type)
+        md5_sum.update(mimeStr.encode('ascii', 'xmlcharrefreplace'))
         vNum = convert_int2b62(INT(md5_sum.hexdigest(), 16))
         retval = (to_unicode_or_bust(vNum), length, file_md5)
         return retval
@@ -203,8 +211,11 @@ Two files will have the same ID if
         retval = ''
         for item in self.attachments:
             if item['filename'] == '' and item['subtype'] == 'html':
-                retval = to_unicode_or_bust(item['payload'],
-                                            item['charset'])
+                if item['charset'] and item['charset'] != 'None':
+                    charset = item['charset']
+                else:
+                    charset = 'utf-8'
+                retval = to_unicode_or_bust(item['payload'], charset)
         return retval
 
     @Lazy
@@ -248,6 +259,13 @@ Two files will have the same ID if
             subject = 'No subject'
         return subject
 
+    @staticmethod
+    def decode_header_tuple(headerTuple):
+        val, encoding = headerTuple
+        encoding = encoding if encoding else 'utf-8'
+        retval = to_unicode_or_bust(val, encoding)
+        return retval
+
     @Lazy
     def decodedSubject(self):
         # A subject can be a series of words, each with a different
@@ -255,7 +273,7 @@ Two files will have the same ID if
         subjectTuples = decode_header(self.message['Subject'])
         # Next, decode each onto Unicode. Tradition assumes ASCII, but I
         # (mpj17) will assume UTF-8.
-        subjectWords = [t[0].decode(t[1] or 'utf-8') for t in subjectTuples]
+        subjectWords = [self.decode_header_tuple(t) for t in subjectTuples]
         # Finally, join them all together.
         retval = ''.join(subjectWords)
         return retval

@@ -17,9 +17,13 @@ import re
 try:  # Python 3
     from html.entities import name2codepoint
     from html.parser import HTMLParser
+    unicodeOrString = str
+    unichrOrChr = chr
 except:  # Python 2
     from HTMLParser import HTMLParser
     from htmlentitydefs import name2codepoint
+    unicodeOrString = unicode
+    unichrOrChr = unichr
 from textwrap import TextWrapper
 from gs.core import to_ascii, to_unicode_or_bust
 
@@ -53,7 +57,12 @@ class HTMLConverter(HTMLParser):
         return retval
 
     def __str__(self):
-        return to_ascii(self)
+        if (unicodeOrString == str):  # Python 3
+            retval = self.__unicode__()
+        else:  # Python 2
+            u = unicodeOrString(self)
+            retval = to_ascii(u)
+        return retval
 
     def handle_starttag(self, tag, attrs):
         # Remember the href attribute of the anchor, because it will
@@ -88,13 +97,13 @@ class HTMLConverter(HTMLParser):
 
     def handle_charref(self, name):
         i = int(name)
-        c = unichr(i)
+        c = unichrOrChr(i)
         self.emit(c)
 
     def handle_entityref(self, name):
         i = name2codepoint.get(name, None)
         if i is not None:
-            c = unichr(i)
+            c = unichrOrChr(i)
             self.emit(c)
 
     def handle_data(self, data):
@@ -112,5 +121,5 @@ def convert_to_txt(html):
     converter.feed(html)
     converter.close()
 
-    retval = unicode(converter)
+    retval = unicodeOrString(converter)
     return retval

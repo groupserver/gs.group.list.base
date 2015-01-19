@@ -20,6 +20,7 @@ from email.parser import Parser
 from email.mime.text import MIMEText
 #from mock import patch
 import os
+import sys
 from unittest import TestCase
 from gs.group.list.base.emailmessage import EmailMessage
 
@@ -62,8 +63,13 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
     def test_encoding_latin1(self):
         self.message.message.set_charset('latin1')
+
+        if (sys.version_info < (3, )):
+            expected = 'iso8859-1'
+        else:  # Python 3
+            expected = 'latin1'
         r = self.message.encoding
-        self.assertEqual('iso8859-1', r)
+        self.assertEqual(expected, r)
 
     def test_encoding_iso8859_1(self):
         self.message.message.set_charset('ISO8859-1')
@@ -99,7 +105,8 @@ Tonight on Ethel the Frog we look at violence.\n'''
         r = self.message.attachments
         self.assertEqual(1, len(r))
         self.assertEqual('text/plain', r[0]['mimetype'])
-        self.assertEqual(self.m.split('\n\n')[1], r[0]['payload'])
+        expected = self.m.split('\n\n')[1]
+        self.assertEqual(expected, r[0]['payload'].decode('utf-8'))
 
     def test_attachments_text(self):
         'Test a plain-text attachment to a plain-text message'
@@ -120,9 +127,11 @@ Tonight on Ethel the Frog we look at violence.\n'''
         r = self.message.attachments
         self.assertEqual(2, len(r))
         self.assertEqual('text/plain', r[0]['mimetype'])
-        self.assertEqual(bodyText.get_payload(), r[0]['payload'])
+        self.assertEqual(bodyText.get_payload(),
+                         r[0]['payload'].decode('utf-8'))
         self.assertEqual('text/plain', r[1]['mimetype'])
-        self.assertEqual(textAttachment.get_payload(), r[1]['payload'])
+        self.assertEqual(textAttachment.get_payload(),
+                         r[1]['payload'].decode('utf-8'))
 
     def test_html_body(self):
         a = MIMEMultipart('alternative')
@@ -301,7 +310,13 @@ Tonight on Ethel the Frog we look at violence.\n'''
         subj.append(s3.encode('windows-1252'), 'windows-1252')
         self.message.message.replace_header('Subject', subj.encode())
 
-        expected = s0 + s1 + s2 + s3
+        # --=mpj17=-- There is a difference in behaviour between the
+        # Python 2 email.header product, and the Python 3 product. The main
+        # thing is we get some semblence of the header back.
+        if (sys.version_info < (3, )):
+            expected = s0 + s1 + s2 + s3
+        else:  # Python 3
+            expected = s0 + ' ' + s1 + s2 + s3
         r = self.message.decodedSubject
         self.assertEqual(expected, r)
 
