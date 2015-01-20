@@ -81,9 +81,13 @@ class EmailMessage(object):
 
     def get(self, name, default=''):
         'Get a header'
+        # The value of a can be a series of words, each with a different
+        # encoding. First, get a list of (word, encoding) 2-tuples.
         value = self.message.get(name, default)
+        # Next, decode each onto Unicode.
         headerParts = [self.decode_header_value_tuple(t)
                        for t in decode_header(value)]
+        # Finally, join them all together.
         retval = ' '.join(headerParts)
         return retval
 
@@ -265,20 +269,9 @@ Two files will have the same ID if
         return subject
 
     @Lazy
-    def decodedSubject(self):
-        # A subject can be a series of words, each with a different
-        # encoding. First, get a list of (word, encoding) 2-tuples.
-        subjectTuples = decode_header(self.message['Subject'])
-        # Next, decode each onto Unicode.
-        subjectWords = [self.decode_header_value_tuple(t)
-                        for t in subjectTuples]
-        # Finally, join them all together.
-        retval = ''.join(subjectWords)
-        return retval
-
-    @Lazy
     def subject(self):
-        retval = self.strip_subject(self.decodedSubject, self.list_title)
+        retval = self.strip_subject(self.get('Subject', ''),
+                                    self.list_title)
         return retval
 
     @staticmethod

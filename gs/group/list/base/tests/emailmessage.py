@@ -291,32 +291,32 @@ Tonight on Ethel the Frog we look at violence.\n'''
                                                     'latin-1'))
         self.assertEqual(s, r)
 
-    def test_decodedSubject(self):
-        r = self.message.decodedSubject
+    def test_get(self):
+        r = self.message.get('subject')
         self.assertEqual('Violence', r)
 
-    def test_decodedSubject_latin1(self):
+    def test_get_latin1(self):
         s = 'Je ne ecrit pas français.'
         subj = Header(s.encode('latin-1'), 'latin-1').encode()
         self.message.message.replace_header('Subject', subj)
-        r = self.message.decodedSubject
+        r = self.message.get('Subject')
         self.assertEqual(s, r)
 
-    def test_decodedSubject_utf8(self):
+    def test_get_utf8(self):
         s = 'Tonight on Ethel the Frog\u2026 we look at violence'
         subj = Header(s.encode('utf-8'), 'utf-8').encode()
         self.message.message.replace_header('Subject', subj)
-        r = self.message.decodedSubject
+        r = self.message.get('Subject')
         self.assertEqual(s, r)
 
-    def test_decodedSubject_windows1252(self):
+    def test_get_windows1252(self):
         s = 'Désolé.'
         subj = Header(s.encode('windows-1252'), 'windows-1252').encode()
         self.message.message.replace_header('Subject', subj)
-        r = self.message.decodedSubject
+        r = self.message.get('Subject')
         self.assertEqual(s, r)
 
-    def test_decodedSubject_utf8_ascii_latin1_windows1252(self):
+    def test_get_utf8_ascii_latin1_windows1252(self):
         'Test a header that has multiple encodings'
         s0 = 'Tonight on Ethel the Frog\u2026'
         s1 = 'we look at violence.'
@@ -332,10 +332,10 @@ Tonight on Ethel the Frog we look at violence.\n'''
         # Python 2 email.header product, and the Python 3 product. The main
         # thing is we get some semblence of the header back.
         if (sys.version_info < (3, )):
-            expected = s0 + s1 + s2 + s3
+            expected = ' '.join([s0, s1, s2, s3])
         else:  # Python 3
-            expected = s0 + ' ' + s1 + s2 + s3
-        r = self.message.decodedSubject
+            expected = ' '.join([s0, '', s1, s2, s3])
+        r = self.message.get('Subject')
         self.assertEqual(expected, r)
 
     def test_subject(self):
