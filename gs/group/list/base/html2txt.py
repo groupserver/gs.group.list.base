@@ -24,6 +24,7 @@ except:  # Python 2
     from htmlentitydefs import name2codepoint
     unicodeOrString = unicode
     unichrOrChr = unichr
+import sys
 from textwrap import TextWrapper
 from gs.core import to_ascii, to_unicode_or_bust
 
@@ -43,7 +44,10 @@ class HTMLConverter(HTMLParser):
     # See Ticket 596 <https://projects.iopen.net/groupserver/ticket/596>
 
     def __init__(self):
-        HTMLParser.__init__(self)  # Old-style class
+        if sys.version_info >= (3, 4):
+            HTMLParser.__init__(self, convert_charrefs=False)
+        else:
+            HTMLParser.__init__(self)  # Old-style class
         self.textWrapper = TextWrapper(
             width=74, replace_whitespace=True, drop_whitespace=True)
         self.outText = ''
