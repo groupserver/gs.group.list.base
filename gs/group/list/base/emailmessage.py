@@ -14,7 +14,7 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
-from email.header import Header, decode_header
+from email.header import decode_header
 from email.parser import Parser
 from email.utils import parseaddr
 from hashlib import md5
@@ -47,7 +47,7 @@ class EmailMessage(object):
 
     def __init__(self, messageString, list_title='', group_id='',
                  site_id='', sender_id_cb=None):
-        self._list_title = list_title
+        self.list_title = list_title
         self.group_id = group_id
         self.site_id = site_id
         self.sender_id_cb = sender_id_cb
@@ -278,7 +278,7 @@ Two files will have the same ID if
 
     @Lazy
     def subject(self):
-        retval = self.strip_subject(self.decodedSubject, self._list_title)
+        retval = self.strip_subject(self.decodedSubject, self.list_title)
         return retval
 
     @staticmethod
