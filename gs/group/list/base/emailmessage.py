@@ -71,16 +71,21 @@ class EmailMessage(object):
             encoding = 'utf-8'
         return encoding
 
-    def get(self, name, default=''):
-        value = self.message.get(name, default)
-        header_parts = []
-        for value, encoding in Header.decode_header(value):
-            encoding = self.check_encoding(encoding) if encoding else \
-                self.encoding
-            part = to_unicode_or_bust(value, encoding)
-            header_parts.append(part)
+    @staticmethod
+    def decode_header_value_tuple(headerValueTuple):
+        val, encoding = headerValueTuple
+        # Tradition assumes ASCII, but I (mpj17) will assume UTF-8.
+        encoding = encoding if encoding else 'utf-8'
+        retval = to_unicode_or_bust(val, encoding)
+        return retval
 
-        return ' '.join(header_parts)
+    def get(self, name, default=''):
+        'Get a header'
+        value = self.message.get(name, default)
+        headerParts = [self.decode_header_value_tuple(t)
+                       for t in decode_header(value)]
+        retval = ' '.join(headerParts)
+        return retval
 
     @Lazy
     def sender_id(self):
@@ -258,14 +263,6 @@ Two files will have the same ID if
         if len(subject) == 0:
             subject = 'No subject'
         return subject
-
-    @staticmethod
-    def decode_header_value_tuple(headerValueTuple):
-        val, encoding = headerValueTuple
-        # Tradition assumes ASCII, but I (mpj17) will assume UTF-8.
-        encoding = encoding if encoding else 'utf-8'
-        retval = to_unicode_or_bust(val, encoding)
-        return retval
 
     @Lazy
     def decodedSubject(self):

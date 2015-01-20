@@ -4,7 +4,7 @@
            xmlns:five="http://namespaces.zope.org/five"
            i18n_domain="gs.group.list.base">
 
-  <class class=".email.EmailMessage">
+  <class class=".emailmessage.EmailMessage">
     <implements interface=".interfaces.IEmailMessage" />
   </class>
 
