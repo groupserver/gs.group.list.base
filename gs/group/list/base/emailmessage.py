@@ -75,7 +75,7 @@ it does not provide Unicode versions of the headers by default.'''
 :rtype: str
 
 Email messages have a horrid habbit of using encodings that are wrong. This
-method checks to see if the :module:`codecs` module knows about the
+method checks to see if the :mod:`codecs` module knows about the
 encoding. If the encoding is a mystery ``utf-8`` is returned.'''
         # A slightly wierd encoding that isn't in the standard encoding
         # table
@@ -107,8 +107,8 @@ encoding. If the encoding is a mystery ``utf-8`` is returned.'''
 :returns: The value of the header.
 :rtype: unicode
 
-The :method:`email.message.Message.get` method returns the header as an
-ASCII string. This method uses :function:`email.header.decode_header` to
+The :meth:`email.message.Message.get` method returns the header as an
+ASCII string. This method uses :func:`email.header.decode_header` to
 convert the string to Unicode, if necessary.'''
         # The value of a can be a series of words, each with a different
         # encoding. First, get a list of (word, encoding) 2-tuples.
@@ -159,6 +159,7 @@ lies.'''
     @staticmethod
     def calculate_file_id(file_body, mime_type):
         '''Generate a new identifer for a file
+
 :param bytes file_body: The body of the file
 :param string mime_type: The MIME-type of the file
 :returns: A 3-tuple of ``(identifier, length, fileMD5)``
@@ -283,7 +284,8 @@ Two files will have the same ID if
 :returns: The subject without the group name
 :rtype: Unicode
 
-Normally a ``Subject`` has a group-name in it, within square brackets::
+Normally a :mailheader:`Subject` has a group-name in it, within
+square brackets::
 
     Subject: [Example Group] Violence in British Gangland
 
@@ -327,14 +329,15 @@ removes it."""
 
     @Lazy
     def compressed_subject(self):
-        '''The ``Subject`` without whitespace and all lowercase. Useful
-for comparisons.'''
+        '''The :mailheader:`Subject` without whitespace and all
+lowercase. Useful for comparisons.'''
         return self.normalise_subject(self.subject)
 
     @Lazy
     def sender(self):
-        '''The email address of the person who wrote the message. Not
-actually the ``Sender``.'''
+        '''The email address of the person who wrote the message. 
+
+The :mailheader:`From`, rather than the :mailheader:`Sender`.'''
         sender = self.message.get('From')
         if sender:
             name, addr = parseaddr(sender)
@@ -355,7 +358,7 @@ actually the ``Sender``.'''
         '''The identifier of the topic that this post will belong to.
 
 A topic_id for two posts will clash if the
-:method:`EmailMessage.compressedsubject`, group identifier, and site
+:meth:`EmailMessage.compressedsubject`, group identifier, and site
 identifier are all identical'''
         items = self.compressed_subject + ':' + self.group_id + ':' + \
             self.site_id
