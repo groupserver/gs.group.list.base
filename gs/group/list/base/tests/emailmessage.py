@@ -442,23 +442,23 @@ Tonight on Ethel the Frog we look at violence.\n'''
         # --=mpj17=-- This is fragile.
         self.assertNotEqual('68WJx41vQmeQ543Y1Y02VZ', r)
 
-    def test_txt_file(self):
-        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                                'txt.mbox')
+    def load_email(self, filename):
+        fullFileName = os.path.join('gs', 'group', 'list', 'base', 'tests',
+                                    'emails', filename)
         parser = Parser()
-        with codecs.open(filename, encoding='utf-8') as infile:
-            m = parser.parse(infile)
+        with codecs.open(fullFileName, encoding='utf-8') as infile:
+            retval = parser.parse(infile)
+        return retval
+
+    def test_txt_file(self):
+        m = self.load_email('txt.eml')
         self.message.message = m
 
         r = self.message.body.strip()
         self.assertEqual('God is real, unless declared integer.', r)
 
     def test_txt_and_html_file(self):
-        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                                'txt-html.mbox')
-        parser = Parser()
-        with codecs.open(filename, encoding='utf-8') as infile:
-            m = parser.parse(infile)
+        m = self.load_email('txt-html.eml')
         self.message.message = m
 
         filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
@@ -473,11 +473,7 @@ Tonight on Ethel the Frog we look at violence.\n'''
         self.assertIn('<HTML>', self.message.html_body)
 
     def test_html_file(self):
-        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                                'html.mbox')
-        parser = Parser()
-        with codecs.open(filename, encoding='utf-8') as infile:
-            m = parser.parse(infile)
+        m = self.load_email('html.eml')
         self.message.message = m
 
         filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
@@ -490,3 +486,52 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
         self.assertIn(expected[:8], self.message.html_body)
         self.assertIn('<HTML>', self.message.html_body)
+
+    # Real World stress tests follow
+
+    def test_ms_outlook(self):
+        m = self.load_email('ms-outlook-01.eml')
+        self.message.message = m
+
+        expectedS = 'Order your Entertainment Book now and support '\
+                    'the Obscured Foundation of New Zealand (SG)'
+        self.assertEqual(expectedS, self.message.subject)
+        # Quoted-printable check
+        self.assertTrue(self.message.body)
+        self.assertNotIn('=20', self.message.body)
+        self.assertTrue(self.message.html_body)
+        self.assertNotIn('=20', self.message.html_body)
+
+        self.assertEqual(7, len(self.message.attachments))
+        self.assertEqual(3, len([f for f in self.message.attachments
+                                 if f['filename']]))
+
+    def test_txt_base64_attachments(self):
+        'Ensure the base64 encoded text attachments is decoded correctly.'
+        m = self.load_email('base64attachments.eml')
+        self.message.message = m
+
+        self.assertNotIn('Reporting-MTA: dns;', m.as_string())
+        f = [f for f in self.message.attachments
+             if f['filename'] == 'Delivery report.txt'][0]
+        # Because some fool marked the attachment down as an octet-stream
+        # there is no charset. So guess it.
+        self.assertEqual('application/octet-stream', f['mimetype'])
+        attachmentContent = f['payload'].decode('utf-8')
+        self.assertIn('Reporting-MTA: dns;', attachmentContent)
+        self.assertNotIn('UmVwb3J0aW5nLU1UQTog', attachmentContent)
+
+    def test_base64(self):
+        m = self.load_email('base64.eml')
+        self.message.message = m
+        self.assertNotIn('SSBhZ3JlZSB3aXRoI', self.message.body)
+        self.assertIn('I agree with you.', self.message.body)
+
+    def test_internationalistation(self):
+        m = self.load_email('internationalization.eml')
+        self.message.message = m
+        expected = '\u0049\u00f1\u0074\u00eb\u0072\u006e\u00e2\u0074\u0069'\
+                   '\u00f4\u006e\u00e0\u006c\u0069\u007a\u00e6\u0074\u0069'\
+                   '\u00f8\u006e'
+        self.assertIn(expected, self.message.subject)
+        self.assertIn(expected, self.message.body)
