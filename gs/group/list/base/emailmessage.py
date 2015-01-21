@@ -205,20 +205,23 @@ Two files will have the same ID if
                 outmessages = split_multipart(i, outmessages)
 
             for msg in outmessages:
-                actual_payload = msg.get_payload(decode=True)
-                encoding = msg.get_param('charset', self.encoding)
+                actualPayload = msg.get_payload(decode=True)
+                charset = None
+                if msg.get_content_maintype() == 'text':
+                    charset = msg.get_param('charset', self.encoding)
+                    charset = charset if charset != 'None' else 'utf-8'
                 pd = self.parse_disposition(msg.get('content-disposition',
                                                     ''))
-                filename = to_unicode_or_bust(pd, encoding) if pd else ''
-                fileid, length, md5_sum = self.calculate_file_id(
-                    actual_payload, msg.get_content_type())
+                filename = to_unicode_or_bust(pd, charset) if pd else ''
+                fileid, length, md5Sum = self.calculate_file_id(
+                    actualPayload, msg.get_content_type())
                 retval.append({
-                    'payload': actual_payload,
+                    'payload': actualPayload,
                     'fileid': fileid,
                     'filename': filename,
                     'length': length,
-                    'md5': md5_sum,
-                    'charset': encoding,  # --=mpj17=-- Issues?
+                    'md5': md5Sum,
+                    'charset': charset,  # --=mpj17=-- Issues?
                     'maintype': msg.get_content_maintype(),
                     'subtype': msg.get_content_subtype(),
                     'mimetype': msg.get_content_type(),
@@ -226,10 +229,27 @@ Two files will have the same ID if
         else:
             # Since we aren't a bunch of attachments, actually decode the
             #   body
-            payload = self.message.get_payload(decode=True)
+            # --=mpj17=-- The decode flag to the
+            # email.message.Message.get_payload method is tricky. I quote
+            # <https://docs.python.org/3.4/library/email.message.html>.
+            #
+            #   When decode is False (the default) the body is returned as a
+            #   string without decoding the Content-Transfer-Encoding.
+            #   However, for a Content-Transfer-Encoding of 8bit, an attempt
+            #   is made to decode the original bytes using the charset
+            #   specified by the Content-Type header, using the replace
+            #   error handler. If no charset is specified, or if the charset
+            #   given is not recognized by the email package, the body is
+            #   decoded using the default ASCII charset.
+            if self.message.get('Content-transfer-encoding', '') == '8bit':
+                payload = self.message.get_payload(decode=False)
+            else:
+                payload = self.message.get_payload(decode=True)
+
             cd = self.message.get('content-disposition', '')
             pd = self.parse_disposition(cd)
             filename = to_unicode_or_bust(pd, self.encoding) if pd else ''
+            charset = self.message.get_content_charset(self.encoding)
 
             fileid, length, md5_sum = self.calculate_file_id(
                 payload, self.message.get_content_type())
@@ -239,7 +259,7 @@ Two files will have the same ID if
                       'fileid': fileid,
                       'filename': filename,
                       'length': length,
-                      'charset': str(self.message.get_charset()),
+                      'charset': charset,
                       'maintype': self.message.get_content_maintype(),
                       'subtype': self.message.get_content_subtype(),
                       'mimetype': self.message.get_content_type(),
@@ -267,7 +287,8 @@ Two files will have the same ID if
         retval = ''
         for item in self.attachments:
             if item['filename'] == '' and item['subtype'] != 'html':
-                retval = to_unicode_or_bust(item['payload'], self.encoding)
+                charset = item.get('charset', self.encoding)
+                retval = to_unicode_or_bust(item['payload'], charset)
                 break
         if self.html_body and (not retval):
             retval = convert_to_txt(self.html_body).strip()
@@ -335,7 +356,7 @@ lowercase. Useful for comparisons.'''
 
     @Lazy
     def sender(self):
-        '''The email address of the person who wrote the message. 
+        '''The email address of the person who wrote the message.
 
 The :mailheader:`From`, rather than the :mailheader:`Sender`.'''
         sender = self.message.get('From')
