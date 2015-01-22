@@ -93,15 +93,6 @@ Tonight on Ethel the Frog we look at violence.\n'''
         r = self.message.headers
         self.assertEqual(self.m.split('\n\n')[0], r)
 
-    def test_parse_disposition_no_match(self):
-        r = self.message.parse_disposition('Putting the boot in')
-        self.assertEqual('', r)
-
-    def test_parse_disposition(self):
-        d = '''Content-disposition: attachment; filename="IMG.pdf"'''
-        r = self.message.parse_disposition(d)
-        self.assertEqual('IMG.pdf', r)
-
     def test_calculate_file_id(self):
         # --=mpj17=-- Using self.m as the file body because it is convinient
         r = self.message.calculate_file_id(self.m, 'text/plain')
@@ -550,6 +541,18 @@ encoding'''
         attachmentContent = f['payload'].decode('utf-8')
         self.assertIn('Reporting-MTA: dns;', attachmentContent)
         self.assertNotIn('UmVwb3J0aW5nLU1UQTog', attachmentContent)
+
+    def test_attachments_with_utf8_filenames(self):
+        m = self.load_email('attachments_with_utf8-filenames.eml')
+        self.message.message = m
+
+        filenames = [f['filename'] for f in self.message.attachments
+                     if f['filename']]
+        self.assertEqual(3, len(filenames))
+        # The actual names could get munged, because they are invalid, so
+        # just check the extensions.
+        extns = sorted([f[-3:] for f in filenames])
+        self.assertEqual(['jpg', 'svg', 'txt'], extns)
 
     def test_base64(self):
         m = self.load_email('base64.eml')

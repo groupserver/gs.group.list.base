@@ -148,15 +148,6 @@ lies.'''
         return retval
 
     @staticmethod
-    def parse_disposition(s):
-        '''Get the filename from the content disposition header'''
-        matchObj = re.search('(?i)filename="*(?P<filename>[^"]*)"*', s)
-        retval = ''
-        if matchObj:
-            retval = matchObj.group('filename')
-        return retval
-
-    @staticmethod
     def calculate_file_id(file_body, mime_type):
         '''Generate a new identifer for a file
 
@@ -214,10 +205,13 @@ Two files will have the same ID if
                     charset = msg.get_param('charset', self.encoding)
                     charset = charset if charset is not None else 'utf-8'
                     charset = charset if charset != 'None' else 'utf-8'
-                pd = self.parse_disposition(msg.get('content-disposition',
-                                                    ''))
-                fnCharset = charset if charset is not None else 'utf-8'
-                filename = to_unicode_or_bust(pd, fnCharset) if pd else ''
+                # We only care about filenames in the content-disposion
+                # header, rather than the random ones that are part of the
+                # HTML message.
+                filename = ''
+                if msg.get('Content-Disposition', ''):
+                    filename = msg.get_filename('')
+
                 fileid, length, md5Sum = self.calculate_file_id(
                     actualPayload, msg.get_content_type())
                 retval.append({
@@ -251,9 +245,9 @@ Two files will have the same ID if
             else:
                 payload = self.message.get_payload(decode=True)
 
-            cd = self.message.get('content-disposition', '')
-            pd = self.parse_disposition(cd)
-            filename = to_unicode_or_bust(pd, self.encoding) if pd else ''
+            filename = ''
+            if self.message.get('Content-disposition', ''):
+                filename = self.message.get_filename('')
             charset = self.message.get_content_charset(self.encoding)
 
             fileid, length, md5_sum = self.calculate_file_id(
