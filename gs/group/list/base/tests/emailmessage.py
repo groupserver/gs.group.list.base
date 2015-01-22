@@ -18,6 +18,10 @@ from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.parser import Parser
+try:
+    from email.parser import BytesParser
+except ImportError:  # Python 2
+    from email.parser import Parser as BytesParser
 from email.utils import formataddr
 import os
 import sys
@@ -455,11 +459,18 @@ Tonight on Ethel the Frog we look at violence.\n'''
         # --=mpj17=-- This is fragile.
         self.assertNotEqual('68WJx41vQmeQ543Y1Y02VZ', r)
 
-    def load_email(self, filename):
+    @staticmethod
+    def load_email(filename):
+        '''A useful functioning for loading a sample email file'''
         fullFileName = os.path.join('gs', 'group', 'list', 'base', 'tests',
                                     'emails', filename)
-        parser = Parser()
-        with codecs.open(fullFileName, encoding='utf-8') as infile:
+        # --=mpj17=-- Because the file may contain UTF-8 or ISO 8859-1 in
+        # full eight-bit glory the file is opened in **binary** mode, and
+        # the BinaryParser class is used to parse the message. Python 2.7
+        # lacks a BinaryParser, but the Parser class has been imported as
+        # an alias.
+        parser = BytesParser()
+        with open(fullFileName, 'rb') as infile:
             retval = parser.parse(infile)
         return retval
 
@@ -645,6 +656,13 @@ Tonight on Ethel the Frog we look at violence.\n'''
         expected = 'Je ne ecrit pas français.\n'
         self.assertEqual(expected, self.message.body)
 
+    def test_simple_latin1_8bit(self):
+        m = self.load_email('simple-latin1-8bit.eml')
+        self.message.message = m
+
+        expected = 'Je ne ecrit pas français.\n'
+        self.assertEqual(expected, self.message.body)
+
     def test_simple_utf8_base64(self):
         m = self.load_email('simple-utf8-base64.eml')
         self.message.message = m
@@ -654,6 +672,13 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
     def test_simple_utf8_qp(self):
         m = self.load_email('simple-utf8-qp.eml')
+        self.message.message = m
+
+        expected = 'Je ne ecrit pas français.\n'
+        self.assertEqual(expected, self.message.body)
+
+    def test_simple_utf8_8bit(self):
+        m = self.load_email('simple-utf8-8bit.eml')
         self.message.message = m
 
         expected = 'Je ne ecrit pas français.\n'
