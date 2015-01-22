@@ -212,10 +212,12 @@ Two files will have the same ID if
                 charset = None
                 if msg.get_content_maintype() == 'text':
                     charset = msg.get_param('charset', self.encoding)
+                    charset = charset if charset is not None else 'utf-8'
                     charset = charset if charset != 'None' else 'utf-8'
                 pd = self.parse_disposition(msg.get('content-disposition',
                                                     ''))
-                filename = to_unicode_or_bust(pd, charset) if pd else ''
+                fnCharset = charset if charset is not None else 'utf-8'
+                filename = to_unicode_or_bust(pd, fnCharset) if pd else ''
                 fileid, length, md5Sum = self.calculate_file_id(
                     actualPayload, msg.get_content_type())
                 retval.append({
