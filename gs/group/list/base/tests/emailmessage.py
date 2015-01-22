@@ -512,6 +512,16 @@ Tonight on Ethel the Frog we look at violence.\n'''
         self.assertIn(expected[:8], self.message.html_body)
         self.assertIn('<HTML>', self.message.html_body)
 
+    def test_html_latin1_7bit_utf8_borken(self):
+        '''Test a message with just an HTML body, that lies about its
+encoding'''
+        m = self.load_email('html-latin1-7bit_utf8_borken.eml')
+        self.message.message = m
+
+        self.assertIn('<HTML>', self.message.html_body)
+        expected = self.simpleEmailExpected.replace('ç', '').strip()
+        self.assertEqual(expected, self.message.body.strip())
+
     # Real World stress tests follow
 
     def test_apple_mail(self):
