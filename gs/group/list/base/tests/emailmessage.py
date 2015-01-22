@@ -669,6 +669,15 @@ claims that it is 7bit'''
 
         self.assertEqual(self.simpleEmailExpected, self.message.body)
 
+    def test_simple_latin1_7bit_utf8_borken(self):
+        '''Check that an 8bit ISO 8859-1 email can be read, even if it
+claims that it is 7bit and UTF-8'''
+        m = self.load_email('simple-latin1-7bit_utf8_borken.eml')
+        self.message.message = m
+
+        expected = self.simpleEmailExpected.replace('ç', '')
+        self.assertEqual(expected, self.message.body)
+
     def test_simple_utf8_base64(self):
         m = self.load_email('simple-utf8-base64.eml')
         self.message.message = m
