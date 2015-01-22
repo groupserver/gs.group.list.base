@@ -631,6 +631,34 @@ Tonight on Ethel the Frog we look at violence.\n'''
         expected = 'testing testing testing'
         self.assertEqual(expected, self.message.body.strip())
 
+    def test_simple_latin1_base64(self):
+        m = self.load_email('simple-latin1-base64.eml')
+        self.message.message = m
+
+        expected = 'Je ne ecrit pas français.\n'
+        self.assertEqual(expected, self.message.body)
+
+    def test_simple_latin1_qp(self):
+        m = self.load_email('simple-latin1-qp.eml')
+        self.message.message = m
+
+        expected = 'Je ne ecrit pas français.\n'
+        self.assertEqual(expected, self.message.body)
+
+    def test_simple_utf8_base64(self):
+        m = self.load_email('simple-utf8-base64.eml')
+        self.message.message = m
+
+        expected = 'Je ne ecrit pas français.\n'
+        self.assertEqual(expected, self.message.body)
+
+    def test_simple_utf8_qp(self):
+        m = self.load_email('simple-utf8-qp.eml')
+        self.message.message = m
+
+        expected = 'Je ne ecrit pas français.\n'
+        self.assertEqual(expected, self.message.body)
+
     def test_withattachments(self):
         m = self.load_email('withattachments.eml')
         self.message.message = m
