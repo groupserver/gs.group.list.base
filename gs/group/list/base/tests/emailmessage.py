@@ -606,8 +606,14 @@ Tonight on Ethel the Frog we look at violence.\n'''
         self.assertNotIn('=20', self.message.html_body)
 
         self.assertEqual(7, len(self.message.attachments))
-        self.assertEqual(3, len([f for f in self.message.attachments
-                                 if f['filename']]))
+        fileAttachments = [f for f in self.message.attachments
+                           if f['filename']]
+        self.assertEqual(3, len(fileAttachments))
+        for f in fileAttachments:
+            if f['mimetype'] == 'image/jpeg':
+                m = 'Magic number issue for {0}'
+                self.assertEqual(self.jpegMagicNumber, f['payload'][:2],
+                                 m.format(f['filename']))
 
     def test_simple1(self):
         m = self.load_email('simple1.eml')
