@@ -205,7 +205,10 @@ Two files will have the same ID if
                 outmessages = split_multipart(i, outmessages)
 
             for msg in outmessages:
-                actualPayload = msg.get_payload(decode=True)
+                if msg.get('Content-transfer-encoding', '') == '8bit':
+                    actualPayload = msg.get_payload(decode=False)
+                else:
+                    actualPayload = msg.get_payload(decode=True)
                 charset = None
                 if msg.get_content_maintype() == 'text':
                     charset = msg.get_param('charset', self.encoding)
@@ -368,7 +371,7 @@ The :mailheader:`From`, rather than the :mailheader:`Sender`.'''
     @Lazy
     def name(self):
         '''Get the name of the person who wrote the messsage'''
-        sender = self.message.get('From')
+        sender = self.get('From')
         retval = ''
         if sender:
             retval, sender = parseaddr(sender)
