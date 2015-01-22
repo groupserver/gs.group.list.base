@@ -684,6 +684,13 @@ Tonight on Ethel the Frog we look at violence.\n'''
         expected = 'Je ne ecrit pas français.\n'
         self.assertEqual(expected, self.message.body)
 
+    def test_simple_ascii_7bit(self):
+        m = self.load_email('simple-ascii-7bit.eml')
+        self.message.message = m
+
+        expected = 'I do not write English.\n'
+        self.assertEqual(expected, self.message.body)
+
     def test_withattachments(self):
         m = self.load_email('withattachments.eml')
         self.message.message = m
