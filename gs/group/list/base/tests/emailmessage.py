@@ -467,9 +467,9 @@ Tonight on Ethel the Frog we look at violence.\n'''
                                     'emails', filename)
         # --=mpj17=-- Because the file may contain UTF-8 or ISO 8859-1 in
         # full eight-bit glory the file is opened in **binary** mode, and
-        # the BinaryParser class is used to parse the message. Python 2.7
-        # lacks a BinaryParser, but the Parser class has been imported as
-        # an alias.
+        # the BytesParser class is used to parse and decode the message.
+        # Python 2.7 lacks a BytesParser, but the Parser class has been
+        # imported with an alias.
         parser = BytesParser()
         with open(fullFileName, 'rb') as infile:
             retval = parser.parse(infile)
