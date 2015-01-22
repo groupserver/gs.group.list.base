@@ -1,0 +1,93 @@
+From member@example.com Sat Nov 15 20:09:24 2014
+Return-Path: <member@example.com>
+X-Spam-Checker-Version: SpamAssassin 3.3.2 (2011-06-06) on chc01.example.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-5.9 required=5.0 tests=BAYES_00,HTML_MESSAGE,
+ LOCAL_AUTH_RCVD,SPF_PASS,T_RP_MATCHES_RCVD autolearn=ham version=3.3.2
+X-Original-To: ethel@example.com
+Delivered-To: gsethel@mail.example.com
+Received: from smtp-1.onlinegroups.net (smtp-1.onlinegroups.net
+ [50.97.204.243]) (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256
+ bits)) (Client CN "smtp.onlinegroups.net", Issuer
+ "generator.onlinegroups.net" (verified OK)) by mail.example.com (Postfix)
+ with ESMTP id 3AA166D804A for <ethel@example.com>; Sat, 15 Nov 2014
+ 20:09:24 +1300 (NZDT)
+Received: from mail.example.com (smtp.example.com [202.6.116.226]) (using
+ TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits)) (Client CN
+ "smtp.example.com", Issuer "generator.example.com" (verified OK)) by
+ smtp-1.onlinegroups.net (Postfix) with ESMTPS id 787079DBC3 for
+ <ethel@groups.example.com>; Sat, 15 Nov 2014 20:09:21 +1300 (NZDT)
+Received: from android-4529ef9a83e621fd.fritz.box
+ (83.236.69.111.dynamic.snap.net.nz [111.69.236.83]) (using TLSv1 with
+ cipher DHE-RSA-AES256-SHA (256/256 bits)) (Client did not present a
+ certificate) (Authenticated sender at mail.example.com) by mail.example.com
+ (Postfix) with ESMTP id 7EB4E6D804A for <ethel@groups.example.com>; Sat, 15
+ Nov 2014 20:09:18 +1300 (NZDT)
+User-Agent: K-9 Mail for Android
+In-Reply-To: <1416034735.3548.3.camel@corbeau>
+References: <1416034735.3548.3.camel@corbeau>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="----PJZLPQHVTMO3LHV37XKP5GQPC5T7F5"
+Content-Transfer-Encoding: 8bit
+Subject: Fwd: Re: [Ethel the Frog] GroupServer 14.11
+From: Member <member@example.com>
+Date: Sat, 15 Nov 2014 20:09:14 +1300
+To: Ethel  <ethel@groups.example.com>
+Message-ID: <AFD429EE-62D2-45BE-8555-9A266B5CC926@onlinegroups.net>
+X-Evolution-POP3-UID: 0000edf04b3927cb
+X-Evolution-Source: 1156828727.5597.0@forfiel
+
+
+------PJZLPQHVTMO3LHV37XKP5GQPC5T7F5
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Awesome.
+
+
+-------- Original Message --------
+From: Ethel  <ethel@groups.example.com>
+Sent: 15 November 2014 19:58:55 GMT+13:00
+To: development@groupserver.org
+Subject: Re: [groupserver development] GroupServer 14.11
+
+> We came across a glitch there but overall this is great progress to
+> the best release yet.
+
+The glitch was due to some poorly written queries in the brand new
+email-sender. (I have yet to figure out a nice way to write unit-tests
+for the database code.) I have fixed the glitch:
+<https://github.com/groupserver/gs.group.list.sender/commit/b035298591f1009d28cc624cfa467b3ca33c16af>
+
+On Monday I will test more systematically, but I am fairly sure it is a
+*lot* better now.
+
+--
+
+View topic http://groupserver.org/r/topic/4ln7PjcppCMsKT31U5pzZJ
+
+Leave group mailto:development@groupserver.org?Subject=unsubscribe
+
+Start groups http://OnlineGroups.net
+
+
+------PJZLPQHVTMO3LHV37XKP5GQPC5T7F5
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><meta content="text/html; charset=utf-8" http-equiv="Content-Type"></head>Awesome.<br><br><div style='font-size:10.0pt;font-family:"Tahoma","sans-serif";padding:3.0pt 0in 0in 0in'>
+<hr style='border:none;border-top:solid #E1E1E1 1.0pt'>
+<b>From:</b> Ethel  &lt;ethel@groups.example.com&gt;<br>
+<b>Sent:</b> 15 November 2014 19:58:55 GMT+13:00<br>
+<b>To:</b> development@groupserver.org<br>
+<b>Subject:</b> Re: [groupserver development] GroupServer 14.11<br>
+</div>
+<br>
+<pre class="k9mail"><blockquote class="gmail_quote" style="margin: 0pt 0pt 1ex 0.8ex; border-left: 1px solid #729fcf; padding-left: 1ex;"> We came across a glitch there but overall this is great progress to<br /> the best release yet.<br /></blockquote><br />The glitch was due to some poorly written queries in the brand new<br />email-sender. (I have yet to figure out a nice way to write unit-tests<br />for the database code.) I have fixed the glitch:<br />&lt;<a href="https://github.com/groupserver/gs.group.list.sender/commit/b035298591f1009d28cc624cfa467b3ca33c16af">https://github.com/groupserver/gs.group.list.sender/commit/b035298591f1009d28cc624cfa467b3ca33c16af</a>&gt;<br /><br />On Monday I will test more systematically, but I am fairly sure it is a<br />*lot* better now.<br /><br />-- <br />Ethel             <a href="http://onlinegroups.net">http://onlinegroups.net</a>/<br />Usability Engineer<br /><br /><br />--<br /><br />View topic <a
+href="http://groupserver.org/r/topic/4ln7PjcppCMsKT31U5pzZJ">http://groupserver.org/r/topic/4ln7PjcppCMsKT31U5pzZJ</a><br /><br />Leave group mailto:development@groupserver.org?Subject=unsubscribe<br /><br />Start groups <a href="http://OnlineGroups.net">http://OnlineGroups.net</a><br /><br /></pre><br>
+-- <br>
+</html>
+------PJZLPQHVTMO3LHV37XKP5GQPC5T7F5--
+
+

@@ -16,9 +16,9 @@ from __future__ import absolute_import, unicode_literals
 import codecs
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
-from email.parser import Parser
 from email.mime.text import MIMEText
-#from mock import patch
+from email.parser import Parser
+from email.utils import formataddr
 import os
 import sys
 from unittest import TestCase
@@ -31,6 +31,9 @@ To: Group <group@groups.example.com>
 Subject: Violence
 
 Tonight on Ethel the Frog we look at violence.\n'''
+
+    pngMagicNumber = b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'
+    jpegMagicNumber = b'\xFF\xD8'
 
     def setUp(self):
         self.message = EmailMessage(self.m, list_title='Ethel the Frog',
@@ -418,6 +421,16 @@ Tonight on Ethel the Frog we look at violence.\n'''
         r = self.message.name
         self.assertEqual('Me', r)
 
+    def test_i18n_name(self):
+        name = "L'étrange"
+        encodedName = str(Header(name, 'utf-8'))
+        email = 'member@example.com'
+        addr = formataddr((encodedName, email))
+        self.message.message.replace_header('From', addr)
+
+        r = self.message.name
+        self.assertEqual(name, r)
+
     def test_topic_id(self):
         r = self.message.topic_id
         # --=mpj17=-- This is fragile.
@@ -489,22 +502,17 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
     # Real World stress tests follow
 
-    def test_ms_outlook(self):
-        m = self.load_email('ms-outlook-01.eml')
+    def test_apple_mail(self):
+        m = self.load_email('apple-mail.eml')
         self.message.message = m
 
-        expectedS = 'Order your Entertainment Book now and support '\
-                    'the Obscured Foundation of New Zealand (SG)'
-        self.assertEqual(expectedS, self.message.subject)
-        # Quoted-printable check
-        self.assertTrue(self.message.body)
-        self.assertNotIn('=20', self.message.body)
-        self.assertTrue(self.message.html_body)
-        self.assertNotIn('=20', self.message.html_body)
-
-        self.assertEqual(7, len(self.message.attachments))
-        self.assertEqual(3, len([f for f in self.message.attachments
-                                 if f['filename']]))
+        self.assertEqual('Test AppleMail email with photo attached',
+                         self.message.subject)
+        self.assertIn('Photo attached.', self.message.body)
+        self.assertIn('webkit', self.message.html_body)
+        image = [a for a in self.message.attachments
+                 if a['filename']][0]
+        self.assertEqual(self.jpegMagicNumber, image['payload'][:2])
 
     def test_txt_base64_attachments(self):
         'Ensure the base64 encoded text attachments is decoded correctly.'
@@ -527,6 +535,32 @@ Tonight on Ethel the Frog we look at violence.\n'''
         self.assertNotIn('SSBhZ3JlZSB3aXRoI', self.message.body)
         self.assertIn('I agree with you.', self.message.body)
 
+    def test_google_gmail(self):
+        m = self.load_email('google-gmail-img.eml')
+        self.message.message = m
+        self.assertEqual('Very strange...', self.message.subject)
+        self.assertIn('Why does this happen', self.message.body)
+        self.assertIn('gmail_signature', self.message.html_body)
+
+        # Check the image
+        f = [f for f in self.message.attachments
+             if f['filename']][0]
+        self.assertEqual('image/png', f['mimetype'])
+        if (sys.version_info < (3, )):
+            self.assertEqual(str, type(f['payload']))
+        else:
+            self.assertEqual(bytes, type(f['payload']))
+        self.assertNotEqual(b'iVBORw0K', f['payload'][:8])
+        self.assertEqual(self.pngMagicNumber, f['payload'][:8])
+
+    def test_ibm_notes(self):
+        m = self.load_email('ibm-notes.eml')
+        self.message.message = m
+
+        self.assertEqual('Email bounced', self.message.subject)
+        self.assertIn('Hello Support,', self.message.body)
+        self.assertIn('<font', self.message.html_body)
+
     def test_internationalistation(self):
         m = self.load_email('internationalization.eml')
         self.message.message = m
@@ -535,3 +569,70 @@ Tonight on Ethel the Frog we look at violence.\n'''
                    '\u00f8\u006e'
         self.assertIn(expected, self.message.subject)
         self.assertIn(expected, self.message.body)
+
+    def test_k9(self):
+        m = self.load_email('k9.eml')
+        self.message.message = m
+
+        self.assertEqual('GroupServer 14.11', self.message.subject)
+        self.assertIn('Awesome', self.message.body)
+        self.assertIn('Awesome', self.message.html_body)
+
+    def test_k9_jpeg(self):
+        m = self.load_email('k9-jpeg.eml')
+        self.message.message = m
+
+        self.assertEqual('File links message preview screenshot',
+                         self.message.subject)
+        self.assertIn('K-9 Mail', self.message.body)
+        self.assertEqual('', self.message.html_body)
+        attachments = [a for a in self.message.attachments
+                       if a['filename']]
+        self.assertEqual(1, len(attachments))
+        self.assertEqual(self.jpegMagicNumber,
+                         attachments[0]['payload'][:2])
+
+    def test_ms_outlook(self):
+        m = self.load_email('ms-outlook-01.eml')
+        self.message.message = m
+
+        expectedS = 'Order your Entertainment Book now and support '\
+                    'the Obscured Foundation of New Zealand (SG)'
+        self.assertEqual(expectedS, self.message.subject)
+        # Quoted-printable check
+        self.assertTrue(self.message.body)
+        self.assertNotIn('=20', self.message.body)
+        self.assertTrue(self.message.html_body)
+        self.assertNotIn('=20', self.message.html_body)
+
+        self.assertEqual(7, len(self.message.attachments))
+        self.assertEqual(3, len([f for f in self.message.attachments
+                                 if f['filename']]))
+
+    def test_simple1(self):
+        m = self.load_email('simple1.eml')
+        self.message.message = m
+
+        self.assertEqual('testing 7', self.message.subject)
+        expected = 'testing testing testing'
+        self.assertEqual(expected, self.message.body.strip())
+
+    def test_simple2(self):
+        m = self.load_email('simple2.eml')
+        self.message.message = m
+
+        self.assertEqual('TesTing 7', self.message.subject)
+        expected = 'testing testing testing'
+        self.assertEqual(expected, self.message.body.strip())
+
+    def test_withattachments(self):
+        m = self.load_email('withattachments.eml')
+        self.message.message = m
+
+        self.assertEqual('testing attachments', self.message.subject)
+        attachments = [a for a in self.message.attachments
+                       if a['filename']]
+        self.assertEqual(3, len(attachments))
+        for a in attachments:
+            self.assertEqual(self.pngMagicNumber, a['payload'][:8],
+                             '{0} is not a PNG'.format(a['filename']))
