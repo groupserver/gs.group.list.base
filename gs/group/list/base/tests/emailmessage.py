@@ -38,6 +38,7 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
     pngMagicNumber = b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'
     jpegMagicNumber = b'\xFF\xD8'
+    simpleEmailExpected = 'Je ne ecrit pas français.\n'
 
     def setUp(self):
         self.message = EmailMessage(self.m, list_title='Ethel the Frog',
@@ -646,43 +647,53 @@ Tonight on Ethel the Frog we look at violence.\n'''
         m = self.load_email('simple-latin1-base64.eml')
         self.message.message = m
 
-        expected = 'Je ne ecrit pas français.\n'
-        self.assertEqual(expected, self.message.body)
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
 
     def test_simple_latin1_qp(self):
         m = self.load_email('simple-latin1-qp.eml')
         self.message.message = m
 
-        expected = 'Je ne ecrit pas français.\n'
-        self.assertEqual(expected, self.message.body)
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
 
     def test_simple_latin1_8bit(self):
         m = self.load_email('simple-latin1-8bit.eml')
         self.message.message = m
 
-        expected = 'Je ne ecrit pas français.\n'
-        self.assertEqual(expected, self.message.body)
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
+
+    def test_simple_latin1_7bit_borken(self):
+        '''Check that an 8bit ISO 8859-1 email can be read, even if it
+claims that it is 7bit'''
+        m = self.load_email('simple-latin1-7bit_borken.eml')
+        self.message.message = m
+
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
 
     def test_simple_utf8_base64(self):
         m = self.load_email('simple-utf8-base64.eml')
         self.message.message = m
 
-        expected = 'Je ne ecrit pas français.\n'
-        self.assertEqual(expected, self.message.body)
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
 
     def test_simple_utf8_qp(self):
         m = self.load_email('simple-utf8-qp.eml')
         self.message.message = m
 
-        expected = 'Je ne ecrit pas français.\n'
-        self.assertEqual(expected, self.message.body)
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
 
     def test_simple_utf8_8bit(self):
         m = self.load_email('simple-utf8-8bit.eml')
         self.message.message = m
 
-        expected = 'Je ne ecrit pas français.\n'
-        self.assertEqual(expected, self.message.body)
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
+
+    def test_simple_utf8_7bit_borken(self):
+        '''Check that an 8bit UTF-8 email can be read, even if it claims
+that it is 7bit'''
+        m = self.load_email('simple-utf8-7bit_borken.eml')
+        self.message.message = m
+
+        self.assertEqual(self.simpleEmailExpected, self.message.body)
 
     def test_simple_ascii_7bit(self):
         m = self.load_email('simple-ascii-7bit.eml')
