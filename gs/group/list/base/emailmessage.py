@@ -367,6 +367,7 @@ lowercase. Useful for comparisons.'''
         '''The email address of the person who wrote the message.
 
 The :mailheader:`From`, rather than the :mailheader:`Sender`.'''
+        retval = ''
         sender = self.message.get('From')
         if sender:
             name, addr = parseaddr(sender)
