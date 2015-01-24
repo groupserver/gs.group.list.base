@@ -34,6 +34,7 @@ Unicode.
 Resources
 =========
 
+- Documentation: http://groupserver.readthedocs.org/projects/gsgrouplistbase/
 - Code repository: https://github.com/groupserver/gs.group.list.base
 - Questions and comments to http://groupserver.org/groups/development
 - Report bugs at https://redmine.iopen.net/projects/groupserver
