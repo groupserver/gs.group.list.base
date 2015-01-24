@@ -12,7 +12,7 @@ present) and some headers in Unicode. (Most of the attributes of
 the :class:`EmailMessage` are methods decorated with the
 :func:`zope.cachedescriptors.property.Lazy` decorator.)
 
-.. class:: EmailMessage
+.. class:: EmailMessage(messageString, list_title='', group_id='', site_id='', sender_id_cb=None)
 
    An email message with Unicode knowledge
 
