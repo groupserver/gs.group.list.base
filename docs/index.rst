@@ -1,6 +1,12 @@
 :mod:`gs.group.list.base`
 =========================
 
+This product supplies the code common to all the list-products.
+A surprisingly large amount of GroupServer_ functionality has
+absolutely nothing to do with what people normally consider core
+mailing-list functionality. However, the ``gs.group.list.*``
+products do.
+
 Contents:
 
 .. toctree::
@@ -8,6 +14,8 @@ Contents:
 
    emailmessage
    HISTORY
+
+
 
 Indices and tables
 ==================
