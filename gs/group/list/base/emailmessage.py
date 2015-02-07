@@ -402,10 +402,11 @@ identifier are all identical'''
         '''The identifier for the post
 
 A post_id for two posts will clash if
+
 * The topic IDs are the same, and
 * The compressed subjects are the same, and
 * The body of the posts are the same, and
- *The posts are from the same author, and
+* The posts are from the same author, and
 * The posts respond to the same message, and
 * The posts have the same length of attachments.'''
         len_payloads = sum([x['length'] for x in self.attachments])
