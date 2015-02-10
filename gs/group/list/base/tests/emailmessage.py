@@ -23,6 +23,7 @@ try:
 except ImportError:  # Python 2
     from email.parser import Parser as BytesParser
 from email.utils import formataddr
+from mock import patch
 import os
 import sys
 from unittest import TestCase
@@ -257,6 +258,22 @@ Tonight on Ethel the Frog we look at violence.\n'''
         expected = 'Je ne ecrit pas français.'
         r = self.message.body
         self.assertEqual(expected, r)
+
+    def test_null_body(self):
+        'Sometimes the body is null'
+        with patch.object(self.message, 'attachments') as ma:
+            rv = {'payload': None, 'filename': '', 'subtype': 'text'}
+            ma.return_value = [rv]
+            r = self.message.body
+        self.assertEqual('', r)
+
+    def test_null_html_body(self):
+        'Sometimes the HTML body is null'
+        with patch.object(self.message, 'attachments') as ma:
+            rv = {'payload': None, 'filename': '', 'subtype': 'html'}
+            ma.return_value = [rv]
+            r = self.message.html_body
+        self.assertEqual('', r)
 
     def test_strip_subject(self):
         r = self.message.strip_subject('[Ethel the Frog] Violence',
