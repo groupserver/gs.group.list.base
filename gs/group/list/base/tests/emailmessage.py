@@ -320,6 +320,14 @@ Tonight on Ethel the Frog we look at violence.\n'''
                                                     'latin-1'))
         self.assertEqual(s, r)
 
+    def test_decode_header_value_tuple_lies(self):
+        'Ensure that we do something sane when lied to'
+        s = 'Je ne ecrit pas français.'
+        r = self.message.decode_header_value_tuple((s.encode('latin1'),
+                                                    'utf-8'))
+        expected = s.encode('ascii', 'ignore').decode('ascii')
+        self.assertEqual(expected, r)
+
     def test_get(self):
         r = self.message.get('subject')
         self.assertEqual('Violence', r)

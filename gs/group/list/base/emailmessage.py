@@ -96,7 +96,12 @@ encoding. If the encoding is a mystery ``utf-8`` is returned.'''
         val, encoding = headerValueTuple
         # Tradition assumes ASCII, but I (mpj17) will assume UTF-8.
         encoding = encoding if encoding else 'utf-8'
-        retval = to_unicode_or_bust(val, encoding)
+        try:
+            retval = to_unicode_or_bust(val, encoding)
+        except UnicodeDecodeError:
+            # Unless something goes wrong. It could be Latin-1, but
+            # I cannot be bothered with that.
+            retval = val.decode('ascii', 'ignore')
         return retval
 
     def get(self, name, default=''):

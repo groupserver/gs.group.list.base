@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.0.2 (2015-02-11)
+------------------
+
+* Handling corner cases where the header lies about its encoding
+
 1.0.1 (2015-02-10)
 ------------------
 
