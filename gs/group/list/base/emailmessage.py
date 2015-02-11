@@ -273,11 +273,11 @@ Two files will have the same ID if
         retval = ''
         for item in self.attachments:
             if item['filename'] == '' and item['subtype'] == 'html':
-                if item['charset'] and item['charset'] != 'None':
-                    charset = item['charset']
-                else:
+                charset = item.get('charset', self.encoding)
+                if ((charset == 'None') or (charset is None)):
                     charset = 'utf-8'
-                payload = item['payload'] if item['payload'] else b''
+                payload = item['payload'] if item['payload'] is not None \
+                    else b''
                 try:
                     retval = to_unicode_or_bust(payload, charset)
                 except UnicodeDecodeError:
@@ -294,7 +294,9 @@ Two files will have the same ID if
         for item in self.attachments:
             if item['filename'] == '' and item['subtype'] != 'html':
                 charset = item.get('charset', self.encoding)
-                payload = item['payload'] if item['payload'] else b''
+                charset = charset if charset is not None else 'utf-8'
+                payload = item['payload'] if item['payload'] is not None \
+                    else b''
                 try:
                     retval = to_unicode_or_bust(payload, charset)
                 except UnicodeDecodeError:
