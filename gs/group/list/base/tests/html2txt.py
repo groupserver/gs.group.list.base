@@ -14,7 +14,6 @@
 ############################################################################
 from __future__ import absolute_import, unicode_literals
 import codecs
-#from mock import patch
 import os
 from unittest import TestCase
 from gs.group.list.base.html2txt import (HTMLConverter, convert_to_txt,
