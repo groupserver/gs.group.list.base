@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.0.3 (2015-04-08)
+------------------
+
+* Improving the handling of :header:`Subject` headers that
+  contain ``[square brackets``]
+
 1.0.2 (2015-02-11)
 ------------------
 
