@@ -36,6 +36,7 @@ else:
 reRegexp = re.compile('re:', re.IGNORECASE)
 fwRegexp = re.compile('fw:', re.IGNORECASE)
 fwdRegexp = re.compile('fwd:', re.IGNORECASE)
+squareBracketRegexp = re.compile('^\[(.*)\]$', re.IGNORECASE)
 # See <http://www.w3.org/TR/unicode-xml/#Suitable>
 uParaRegexep = re.compile('[\u2028\u2029]+')
 annoyingChars = string.whitespace + '\uFFF9\uFFFA\uFFFB\uFFFC\uFEFF'
@@ -334,6 +335,11 @@ removes it."""
         if list_title:
             subject = re.sub('\[%s\]' % re.escape(list_title), '',
                              subject).strip()
+        # Strip the square backets that can surround the entire subject
+        # Eg. "[Fwd: I am a fish.]"
+        m = squareBracketRegexp.match(subject)
+        if m:
+            subject = m.group(1)
 
         subject = uParaRegexep.sub(' ', subject)
         # compress up the whitespace into a single space
@@ -344,8 +350,8 @@ removes it."""
             subject = reRegexp.sub('', subject)
             subject = fwRegexp.sub('', subject)
             subject = fwdRegexp.sub('', subject)
-            subject = subject.lstrip(annoyingCharsL + '[')
-            subject = subject.rstrip(annoyingCharsR + ']')
+            subject = subject.lstrip(annoyingCharsL)
+            subject = subject.rstrip(annoyingCharsR)
         else:
             subject = subject.lstrip(annoyingCharsL)
             subject = subject.rstrip(annoyingCharsR)

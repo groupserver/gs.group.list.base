@@ -289,9 +289,22 @@ Tonight on Ethel the Frog we look at violence.\n'''
         self.assertEqual('Violence', r)
 
     def test_strip_subject(self):
+        'Ensure that a normal subject is left unaltered'
+        e = 'The Violence of British Gangland'
+        r = self.message.strip_subject(e, 'Ethel the Frog')
+        self.assertEqual(e, r)
+
+    def test_strip_subject_group(self):
+        'Test that the group name is stripped from the subject'
         r = self.message.strip_subject('[Ethel the Frog] Violence',
                                        'Ethel the Frog')
         self.assertEqual('Violence', r)
+
+    def test_subject_stripped_other(self):
+        'Ensure that the name of another group is not stripped'
+        e = '[Cheese Shop] Violence'
+        r = self.message.strip_subject(e, 'Ethel the Frog')
+        self.assertEqual(e, r)
 
     def test_strip_subject_missing(self):
         r = self.message.strip_subject('', 'Ethel the Frog')
@@ -299,6 +312,21 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
     def test_strip_subject_re(self):
         r = self.message.strip_subject('Re: [Ethel the Frog] Violence',
+                                       'Ethel the Frog')
+        self.assertEqual('Violence', r)
+
+    def test_strip_subject_fw(self):
+        r = self.message.strip_subject('Fw: Violence',
+                                       'Ethel the Frog')
+        self.assertEqual('Violence', r)
+
+    def test_strip_subject_fwd(self):
+        r = self.message.strip_subject('Fwd: Violence',
+                                       'Ethel the Frog')
+        self.assertEqual('Violence', r)
+
+    def test_strip_subject_fwd_bracket(self):
+        r = self.message.strip_subject('[Fwd: Violence]',
                                        'Ethel the Frog')
         self.assertEqual('Violence', r)
 
@@ -398,12 +426,14 @@ Tonight on Ethel the Frog we look at violence.\n'''
         self.assertEqual(s, r)
 
     def test_subject_stripped(self):
+        'Ensure we strip the name of the group from the subject'
         self.message.message.replace_header(
             'Subject', '[Ethel the Frog] The Violence of British Gangland')
         r = self.message.subject
         self.assertEqual('The Violence of British Gangland', r)
 
     def test_subject_stripped_utf8(self):
+        'Ensure we strip the group name from UTF-8 encoded subjects'
         s = 'Tonight on Ethel the Frog\u2026 we look at violence'
         fullS = '[Ethel the Frog] ' + s
         subj = Header(fullS.encode('utf-8'), 'utf-8')
