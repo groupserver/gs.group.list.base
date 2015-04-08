@@ -288,34 +288,96 @@ Tonight on Ethel the Frog we look at violence.\n'''
         r = self.message.html_body
         self.assertEqual('Violence', r)
 
-    def test_drop_bracket_none(self):
+    def test_strip_bracket_none(self):
         'Ensure the string is unaltered if there are no brackets'
         e = 'The Violence of British Gangland'
-        r = self.message.drop_bracket(e)
+        r = self.message.strip_bracket(e)
         self.assertEqual(e, r)
 
-    def test_drop_bracket(self):
+    def test_strip_bracket(self):
         'Ensure the brackets are stripped from the start and end'
         e = 'The Violence of British Gangland'
-        r = self.message.drop_bracket('[' + e + ']')
+        r = self.message.strip_bracket('[' + e + ']')
         self.assertEqual(e, r)
 
-    def test_drop_bracket_start(self):
+    def test_strip_bracket_start(self):
         'Ensure that brackets at the start are left as-is'
         e = '[Ethel the Frog] The Violence of British Gangland'
-        r = self.message.drop_bracket(e)
+        r = self.message.strip_bracket(e)
         self.assertEqual(e, r)
 
-    def test_drop_bracket_end(self):
+    def test_strip_bracket_end(self):
         'Test the brackets at the end are left as-is'
         e = 'The Violence of British Gangland [Ethel the Frog]'
-        r = self.message.drop_bracket(e)
+        r = self.message.strip_bracket(e)
         self.assertEqual(e, r)
 
-    def test_drop_bracket_middle(self):
+    def test_strip_bracket_middle(self):
         'Test the brackets in the middle are left as-is'
         e = 'The Violence of [Ethel the Frog] British Gangland'
-        r = self.message.drop_bracket(e)
+        r = self.message.strip_bracket(e)
+        self.assertEqual(e, r)
+
+    def test_strip_list_title(self):
+        'Test that the list name is stripped from the subject'
+        e = 'The Violence of British Gangland'
+        gn = 'Ethel the Frog'
+        r = self.message.strip_list_title('[{0}] {1}'.format(gn, e), gn)
+        self.assertEqual(e, r)
+
+    def test_strip_list_title_other(self):
+        e = 'The Violence of British Gangland'
+        gn = 'Ethel the Frog'
+        odd = '[Cheese Shop] {0}'.format(e)
+        r = self.message.strip_list_title(odd, gn)
+        self.assertEqual(odd, r)
+
+    def test_strip_list_title_end(self):
+        e = 'The Violence of British Gangland'
+        gn = 'Ethel the Frog'
+        odd = '{1} [{0}]'.format(e, gn)
+        r = self.message.strip_list_title(odd, gn)
+        self.assertEqual(odd, r)
+
+    def test_strip_re_fwd_none(self):
+        'Ensure that we only strip Re: and Fwd if they are there'
+        e = 'The Violence of British Gangland'
+        r = self.message.strip_re_fwd(e)
+        self.assertEqual(e, r)
+
+    def test_strip_re_fwd_re(self):
+        'Ensure we strip "Re:"'
+        e = 'The Violence of British Gangland'
+        o = 'Re: {0}'.format(e)
+        r = self.message.strip_re_fwd(o)
+        self.assertEqual(e, r)
+
+    def test_strip_re_fwd_RE(self):
+        'Ensure we strip "RE:" (ignore case)'
+        e = 'The Violence of British Gangland'
+        o = 'RE: {0}'.format(e)
+        r = self.message.strip_re_fwd(o)
+        self.assertEqual(e, r)
+
+    def test_strip_re_fwd_fw(self):
+        'Ensure we strip "Fw:"'
+        e = 'The Violence of British Gangland'
+        o = 'Fw: {0}'.format(e)
+        r = self.message.strip_re_fwd(o)
+        self.assertEqual(e, r)
+
+    def test_strip_re_fwd_fwd(self):
+        'Ensure we strip "Fwd:"'
+        e = 'The Violence of British Gangland'
+        o = 'Fwd: {0}'.format(e)
+        r = self.message.strip_re_fwd(o)
+        self.assertEqual(e, r)
+
+    def test_strip_re_fwd_FWD(self):
+        'Ensure we strip "FWD:"'
+        e = 'The Violence of British Gangland'
+        o = 'Fwd: {0}'.format(e)
+        r = self.message.strip_re_fwd(o)
         self.assertEqual(e, r)
 
     def test_strip_subject(self):
@@ -342,16 +404,6 @@ Tonight on Ethel the Frog we look at violence.\n'''
 
     def test_strip_subject_re(self):
         r = self.message.strip_subject('Re: [Ethel the Frog] Violence',
-                                       'Ethel the Frog')
-        self.assertEqual('Violence', r)
-
-    def test_strip_subject_fw(self):
-        r = self.message.strip_subject('Fw: Violence',
-                                       'Ethel the Frog')
-        self.assertEqual('Violence', r)
-
-    def test_strip_subject_fwd(self):
-        r = self.message.strip_subject('Fwd: Violence',
                                        'Ethel the Frog')
         self.assertEqual('Violence', r)
 

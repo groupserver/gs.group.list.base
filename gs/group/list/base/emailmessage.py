@@ -34,8 +34,7 @@ else:
     unicodeOrString = str
     bytesOrString = bytes
 reRegexp = re.compile('re:', re.IGNORECASE)
-fwRegexp = re.compile('fw:', re.IGNORECASE)
-fwdRegexp = re.compile('fwd:', re.IGNORECASE)
+fwRegexp = re.compile('fwd?:', re.IGNORECASE)
 squareBracketRegexp = re.compile('^\[(.*)\]$', re.IGNORECASE)
 # See <http://www.w3.org/TR/unicode-xml/#Suitable>
 uParaRegexep = re.compile('[\u2028\u2029]+')
@@ -325,45 +324,70 @@ Two files will have the same ID if
 Normally a :mailheader:`Subject` has a group-name in it, within
 square brackets::
 
-    Subject: [Example Group] Violence in British Gangland
+    Subject: [Ethel the Frog] Violence in British Gangland
 
 The group name is useful, but not for the *group*. So this method
 removes it."""
-        # remove the list title from the subject, if it isn't just an
-        # empty string
-        if list_title:
-            subject = re.sub('\[%s\]' % re.escape(list_title), '',
-                             subject).strip()
-        # Strip the square backets that can surround the entire subject
-        # Eg. "[Fwd: I am a fish.]"
-        subject = self.drop_bracket(subject)
+        subject = self.strip_list_title(subject, list_title)
+        subject = self.strip_bracket(subject)
 
         subject = uParaRegexep.sub(' ', subject)
-        # compress up the whitespace into a single space
-        subject = re.sub('\s+', ' ', subject).strip()
         if remove_re:
-            # remove the "re:" from the subject line. There are probably
-            # other variants we don't yet handle.
-            subject = reRegexp.sub('', subject)
-            subject = fwRegexp.sub('', subject)
-            subject = fwdRegexp.sub('', subject)
+            subject = self.strip_re_fwd(subject)
         subject = subject.lstrip(annoyingCharsL)
         subject = subject.rstrip(annoyingCharsR)
 
         # Strip the square brackets that can still be there:
         # "Re: [Fwd: I am a fish]"
-        subject = self.drop_bracket(subject)
+        subject = self.strip_bracket(subject)
+        # compress up the whitespace into a single space
+        subject = re.sub('\s+', ' ', subject).strip()
 
         if len(subject) == 0:
             subject = 'No subject'
         return subject
 
     @staticmethod
-    def drop_bracket(s):
+    def strip_list_title(s, title):
+        '''Remove the list title from the subject
+
+:param str s: The subject
+:param str title: The name of the group
+:returns: The subject without the group name
+:rtype: Unicode'''
+        retval = s
+        if title:
+            listTitleRe = re.compile('\[%s\]' % re.escape(title))
+            retval = listTitleRe.sub('', s).strip()
+        return retval
+
+    @staticmethod
+    def strip_bracket(s):
+        '''Strip the square backets that can surround the entire subject
+:param str s: The subject
+:returns: The subject without the surrounding square brackets
+:rtype: Unicode
+
+The most common use of surrounding square brackets is with forwarded
+messages, such as ``[Fwd: I am a fish.``'''
         retval = s
         m = squareBracketRegexp.match(s)
         if m:
-            retval = m.group(1)
+            retval = m.group(1).strip()
+        return retval
+
+    @staticmethod
+    def strip_re_fwd(s):
+        '''Remove the "re:" from the subject line.
+
+:param str s: The subject
+:returns: The subject without the preceeding ``Re:``, ``Fw:`` or ``Fwd:``
+:rtype: Unicode
+
+:Note: There are probably other variants we don't yet handle.'''
+        retval = reRegexp.sub('', s)
+        retval = fwRegexp.sub('', retval)
+        retval = retval.strip()
         return retval
 
     @Lazy
