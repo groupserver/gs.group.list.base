@@ -288,6 +288,36 @@ Tonight on Ethel the Frog we look at violence.\n'''
         r = self.message.html_body
         self.assertEqual('Violence', r)
 
+    def test_drop_bracket_none(self):
+        'Ensure the string is unaltered if there are no brackets'
+        e = 'The Violence of British Gangland'
+        r = self.message.drop_bracket(e)
+        self.assertEqual(e, r)
+
+    def test_drop_bracket(self):
+        'Ensure the brackets are stripped from the start and end'
+        e = 'The Violence of British Gangland'
+        r = self.message.drop_bracket('[' + e + ']')
+        self.assertEqual(e, r)
+
+    def test_drop_bracket_start(self):
+        'Ensure that brackets at the start are left as-is'
+        e = '[Ethel the Frog] The Violence of British Gangland'
+        r = self.message.drop_bracket(e)
+        self.assertEqual(e, r)
+
+    def test_drop_bracket_end(self):
+        'Test the brackets at the end are left as-is'
+        e = 'The Violence of British Gangland [Ethel the Frog]'
+        r = self.message.drop_bracket(e)
+        self.assertEqual(e, r)
+
+    def test_drop_bracket_middle(self):
+        'Test the brackets in the middle are left as-is'
+        e = 'The Violence of [Ethel the Frog] British Gangland'
+        r = self.message.drop_bracket(e)
+        self.assertEqual(e, r)
+
     def test_strip_subject(self):
         'Ensure that a normal subject is left unaltered'
         e = 'The Violence of British Gangland'

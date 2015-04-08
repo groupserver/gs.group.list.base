@@ -313,8 +313,7 @@ Two files will have the same ID if
         assert retval is not None
         return retval
 
-    @staticmethod
-    def strip_subject(subject, list_title, remove_re=True):
+    def strip_subject(self, subject, list_title, remove_re=True):
         """ A helper function for tidying the subject line.
 
 :param str subject: The subject
@@ -337,9 +336,7 @@ removes it."""
                              subject).strip()
         # Strip the square backets that can surround the entire subject
         # Eg. "[Fwd: I am a fish.]"
-        m = squareBracketRegexp.match(subject)
-        if m:
-            subject = m.group(1)
+        subject = self.drop_bracket(subject)
 
         subject = uParaRegexep.sub(' ', subject)
         # compress up the whitespace into a single space
@@ -350,14 +347,24 @@ removes it."""
             subject = reRegexp.sub('', subject)
             subject = fwRegexp.sub('', subject)
             subject = fwdRegexp.sub('', subject)
-            subject = subject.lstrip(annoyingCharsL)
-            subject = subject.rstrip(annoyingCharsR)
-        else:
-            subject = subject.lstrip(annoyingCharsL)
-            subject = subject.rstrip(annoyingCharsR)
+        subject = subject.lstrip(annoyingCharsL)
+        subject = subject.rstrip(annoyingCharsR)
+
+        # Strip the square brackets that can still be there:
+        # "Re: [Fwd: I am a fish]"
+        subject = self.drop_bracket(subject)
+
         if len(subject) == 0:
             subject = 'No subject'
         return subject
+
+    @staticmethod
+    def drop_bracket(s):
+        retval = s
+        m = squareBracketRegexp.match(s)
+        if m:
+            retval = m.group(1)
+        return retval
 
     @Lazy
     def subject(self):
