@@ -42,7 +42,7 @@ def replyto(listInfo):
 
 :param listInfo: The list to examine for the reply-to
 :type listInfo: :class:`Products.GSGroup.interfaces.IGSMailingListInfo`
-:returns: The reply-to setting for the group, defaulting to *Reply to the group*
+:returns: The reply-to setting for the group, defaulting to :attr:`ReplyTo.group`
 :rtype: A member of the :class:`ReplyTo` enumeration.'''
     r = listInfo.get_property('replyto', 'group')
     if r == 'sender':
