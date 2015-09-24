@@ -63,6 +63,7 @@ setup(name='gs.group.list.base',
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
+      tests_require=['mock', ],
       test_suite="gs.group.list.base.tests.test_all",
       entry_points="""# -*- Entry points: -*-
       """,)

@@ -17,7 +17,8 @@ from unittest import TestSuite, main as unittest_main
 from gs.group.list.base.tests.emailmessage import EmailMessageTest
 from gs.group.list.base.tests.html2txt import (
     HTMLConverterTest, ConvertToTextTest)
-testCases = (EmailMessageTest, HTMLConverterTest, ConvertToTextTest)
+from gs.group.list.base.tests.replyto import ReplyToTest
+testCases = (EmailMessageTest, HTMLConverterTest, ConvertToTextTest, ReplyToTest)
 
 
 def load_tests(loader, tests, pattern):
