@@ -14,6 +14,7 @@
 ############################################################################
 import codecs
 import os
+import sys
 from setuptools import setup, find_packages
 from version import get_version
 
@@ -26,10 +27,12 @@ with codecs.open(os.path.join("docs", "HISTORY.rst"),
     long_description += '\n' + f.read()
 
 install_requires = [
-    'setuptools',
     'zope.cachedescriptors',
     'zope.interface',
     'gs.core', ]
+
+if (sys.version_info < (3, 4)):
+    install_requires += ['setuptools', 'enum34']
 
 setup(name='gs.group.list.base',
       version=version,
