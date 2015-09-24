@@ -1,11 +1,21 @@
 Changelog
 =========
 
+1.1.0 (2015-09-24)
+------------------
+
+* Adding the ``replyto`` function, and ``ReplyTo`` enumeration,
+  moving them here from `gs.group.list.sender`_
+* Updating the documentation
+
+.. _gs.group.list.sender:
+   https://github.com/groupserver/gs.group.list.sender
+
 1.0.3 (2015-04-08)
 ------------------
 
-* Improving the handling of :mailheader:`Subject` headers that
-  contain ``[square brackets]``
+* Improving the handling of ``Subject`` headers that contain
+  ``[square brackets]``
 
 1.0.2 (2015-02-11)
 ------------------
