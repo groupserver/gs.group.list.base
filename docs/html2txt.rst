@@ -11,6 +11,10 @@ plain-text version of a HTML documents. It is fairly simple,
 returning a Unicode version of the HTML, and it is used in the
 rare case that a plain-text body is absent from an email message.
 
+The :func:`convert_to_txt` function is a wrapper for convenience.
+
+.. autofunction:: convert_to_txt
+
 Example
 -------
 

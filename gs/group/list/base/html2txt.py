@@ -118,6 +118,11 @@ class HTMLConverter(HTMLParser):
 
 
 def convert_to_txt(html):
+    '''Convert an HTML document to a plain-text document
+
+:param unicode html: The HTML document to convert, as a string (or ``unicode``).
+:returns: A plain-text version of the document.
+:rtype: unicode'''
     if not html:
         raise ValueError('html argument not set.')
     converter = HTMLConverter()
