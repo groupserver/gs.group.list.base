@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.1.1 (2015-12-10)
+------------------
+
+* Fixing the unit-tests so the work with `zc.recipe.testrunner`_
+
+.. _zc.recipe.testrunner:
+   https://pypi.python.org/pypi/zc.recipe.testrunner
+
 1.1.0 (2015-09-24)
 ------------------
 
