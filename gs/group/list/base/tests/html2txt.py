@@ -15,6 +15,7 @@
 from __future__ import absolute_import, unicode_literals
 import codecs
 import os
+from pkg_resources import resource_filename
 from unittest import TestCase
 from gs.group.list.base.html2txt import (HTMLConverter, convert_to_txt,
                                          unicodeOrString)
@@ -79,32 +80,32 @@ class HTMLConverterTest(TestCase):
         self.assertEqual(notHtml, r)
 
     def test_full_multi_paragraph(self):
-        n = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                         'multi-p.html')
-        with codecs.open(n, encoding='utf-8') as infile:
+        n = os.path.join('tests', 'multi-p.html')
+        fullFileName = resource_filename('gs.group.list.base', n)
+        with codecs.open(fullFileName, encoding='utf-8') as infile:
             html = infile.read()
         self.converter.feed(html)
         self.converter.close()
         r = unicodeOrString(self.converter)
 
-        n = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                         'multi-p.txt')
-        with codecs.open(n, encoding='utf-8') as infile:
+        n = os.path.join('tests', 'multi-p.txt')
+        fullFileName = resource_filename('gs.group.list.base', n)
+        with codecs.open(fullFileName, encoding='utf-8') as infile:
             expected = infile.read().strip()
         self.assertEqual(expected, r)
 
 
 class ConvertToTextTest(TestCase):
     def test_html(self):
-        n = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                         'multi-p.html')
-        with codecs.open(n, encoding='utf-8') as infile:
+        n = os.path.join('tests', 'multi-p.html')
+        fullFileName = resource_filename('gs.group.list.base', n)
+        with codecs.open(fullFileName, encoding='utf-8') as infile:
             html = infile.read()
 
         r = convert_to_txt(html)
-        n = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                         'multi-p.txt')
-        with codecs.open(n, encoding='utf-8') as infile:
+        n = os.path.join('tests', 'multi-p.txt')
+        fullFileName = resource_filename('gs.group.list.base', n)
+        with codecs.open(fullFileName, encoding='utf-8') as infile:
             expected = infile.read().strip()
         self.assertEqual(expected, r)
 
