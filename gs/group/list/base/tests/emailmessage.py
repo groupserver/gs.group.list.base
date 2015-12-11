@@ -24,6 +24,7 @@ except ImportError:  # Python 2
     from email.parser import Parser as BytesParser
 from email.utils import formataddr
 import os
+from pkg_resources import resource_filename
 import sys
 from unittest import TestCase
 from gs.group.list.base.emailmessage import EmailMessage
@@ -604,8 +605,8 @@ Tonight on Ethel the Frog we look at violence.\n'''
     @staticmethod
     def load_email(filename):
         '''A useful functioning for loading a sample email file'''
-        fullFileName = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                                    'emails', filename)
+        testname = os.path.join('tests', 'emails', filename)
+        fullFileName = resource_filename('gs.group.list.base', testname)
         # --=mpj17=-- Because the file may contain UTF-8 or ISO 8859-1 in
         # full eight-bit glory the file is opened in **binary** mode, and
         # the BytesParser class is used to parse and decode the message.
@@ -627,8 +628,8 @@ Tonight on Ethel the Frog we look at violence.\n'''
         m = self.load_email('txt-html.eml')
         self.message.message = m
 
-        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                                'multi-p.txt')
+        testname = os.path.join('tests', 'multi-p.txt')
+        filename = resource_filename('gs.group.list.base', testname)
         with codecs.open(filename, encoding='utf-8') as infile:
             expected = infile.read().strip()[:128]
         r = self.message.body[:128]
@@ -642,8 +643,8 @@ Tonight on Ethel the Frog we look at violence.\n'''
         m = self.load_email('html.eml')
         self.message.message = m
 
-        filename = os.path.join('gs', 'group', 'list', 'base', 'tests',
-                                'multi-p.txt')
+        testname = os.path.join('tests', 'multi-p.txt')
+        filename = resource_filename('gs.group.list.base', testname)
         with codecs.open(filename, encoding='utf-8') as infile:
             expected = infile.read().strip()[:64]
         r = self.message.body[:64]
