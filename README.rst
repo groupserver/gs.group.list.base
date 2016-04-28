@@ -35,7 +35,7 @@ Resources
 =========
 
 - Documentation:
-  http://groupserver.readthedocs.org/projects/gsgrouplistbase/
+  http://groupserver.readthedocs.io/projects/gsgrouplistbase/
 - Code repository:
   https://github.com/groupserver/gs.group.list.base
 - Questions and comments to
